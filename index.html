@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistemas de Ecuaciones Lineales</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e8e8e8; overflow: hidden; }
+  .slide { display: none; width: 100vw; height: 100vh; padding: 50px 80px; flex-direction: column; justify-content: center; position: relative; }
+  .slide.active { display: flex; }
+  .tag { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #7c6ee6; margin-bottom: 18px; }
+  h1 { font-size: 52px; font-weight: 700; line-height: 1.15; color: #fff; }
+  h2 { font-size: 36px; font-weight: 700; color: #fff; margin-bottom: 20px; }
+  h3 { font-size: 20px; font-weight: 600; color: #c8c0f5; margin-bottom: 8px; }
+  p, li { font-size: 18px; line-height: 1.7; color: #c5c5d8; }
+  ul { padding-left: 20px; }
+  li { margin-bottom: 8px; }
+  .subtitle { font-size: 22px; color: #8a87b0; margin-top: 16px; }
+  .accent { color: #a78bfa; font-weight: 600; }
+  .muted { color: #666690; }
+  .badge { display: inline-block; background: #2a2060; color: #a78bfa; border: 1px solid #4a3ea0; border-radius: 6px; padding: 4px 14px; font-size: 14px; font-weight: 600; margin-right: 8px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: start; margin-top: 10px; }
+  .card { background: #181c2a; border: 1px solid #2e2e50; border-radius: 14px; padding: 24px 28px; }
+  .card.purple { border-color: #5b4ecc; }
+  .card.green { border-color: #1e7a5c; }
+  .eq { font-size: 24px; font-weight: 700; color: #fff; font-family: 'Courier New', monospace; margin: 8px 0; background: #13152a; border-left: 4px solid #7c6ee6; padding: 10px 16px; border-radius: 0 8px 8px 0; }
+  .eq.red { border-left-color: #f87171; }
+  .step { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
+  .step-num { background: #7c6ee6; color: #fff; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; margin-top: 2px; }
+  .step-body h3 { margin-bottom: 4px; }
+  canvas { border-radius: 12px; }
+  .nav { position: fixed; bottom: 30px; right: 40px; display: flex; gap: 12px; z-index: 100; }
+  .nav button { background: #2a2060; color: #c8c0f5; border: 1px solid #4a3ea0; border-radius: 10px; padding: 10px 22px; font-size: 15px; cursor: pointer; transition: background 0.2s; }
+  .nav button:hover { background: #3d2f90; }
+  .progress { position: fixed; top: 0; left: 0; height: 3px; background: #7c6ee6; transition: width 0.3s; }
+  .slide-counter { position: fixed; top: 18px; right: 40px; font-size: 13px; color: #555580; }
+  .highlight-box { background: #1a1f35; border: 1px solid #7c6ee6; border-radius: 12px; padding: 18px 22px; margin-top: 16px; }
+  .highlight-box.orange { border-color: #d97706; }
+  .point-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .point-table th { background: #1e1e3a; color: #a78bfa; font-size: 15px; padding: 8px 14px; text-align: center; border: 1px solid #2e2e50; }
+  .point-table td { padding: 8px 14px; text-align: center; font-size: 16px; border: 1px solid #2e2e50; font-family: 'Courier New', monospace; }
+  .point-table tr:nth-child(even) td { background: #181c2a; }
+  .strike { text-decoration: line-through; color: #666; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="slide-counter" id="counter">1 / 8</div>
+
+<!-- SLIDE 1: Portada -->
+<div class="slide active" id="s1">
+  <div class="tag">Álgebra I · IES Siglo 21</div>
+  <h1>Sistemas de<br>Ecuaciones Lineales</h1>
+  <p class="subtitle">Aplicados a <span class="accent">decisiones de costos</span> en la industria del software</p>
+  <div style="margin-top: 40px; display:flex; gap: 10px; flex-wrap: wrap;">
+    <span class="badge">Resolución por sustitución</span>
+    <span class="badge">Resolución por igualación</span>
+    <span class="badge">Interpretación gráfica</span>
+    <span class="badge">Tipos de sistemas</span>
+  </div>
+</div>
+
+<!-- SLIDE 2: Situación real -->
+<div class="slide" id="s2">
+  <div class="tag">Parte 1 · Introducción</div>
+  <h2>La situación profesional</h2>
+  <div class="cols">
+    <div>
+      <p>Una startup de IA necesita elegir entre dos <span class="accent">proveedores de cloud</span> para alojar su modelo de machine learning.</p>
+      <br>
+      <p>Cada proveedor tiene una <span class="accent">estructura de costos diferente</span>: uno cobra más por el acceso inicial pero menos por uso, el otro lo hace al revés.</p>
+      <br>
+      <p>La pregunta que resuelve la matemática: <span class="accent">¿a partir de cuántas horas de uso conviene cada plan?</span></p>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3>☁ Proveedor A — NimboCloud</h3>
+        <p>Costo mensual fijo: <span class="accent">$200</span></p>
+        <p>Costo por hora de cómputo: <span class="accent">$5</span></p>
+      </div>
+      <br>
+      <div class="card green">
+        <h3>🖥 Proveedor B — CoreRack</h3>
+        <p>Sin costo fijo mensual: <span class="accent">$0</span></p>
+        <p>Costo por hora de cómputo: <span class="accent">$15</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: Planteamiento -->
+<div class="slide" id="s3">
+  <div class="tag">Parte 2 · Desarrollo del tema</div>
+  <h2>Plantear el sistema</h2>
+  <p>Llamamos <span class="accent">x</span> = horas de uso mensual, y <span class="accent">y</span> = costo total mensual en dólares.</p>
+  <br>
+  <div class="eq">Proveedor A:   y = 5x + 200</div>
+  <div class="eq">Proveedor B:   y = 15x</div>
+  <br>
+  <div class="highlight-box">
+    <p>Un <span class="accent">Sistema de Ecuaciones Lineales (SEL)</span> es un conjunto de dos o más ecuaciones de primer grado que comparten las mismas incógnitas. La solución es el par (x, y) que satisface <strong>ambas ecuaciones simultáneamente</strong>.</p>
+  </div>
+</div>
+
+<!-- SLIDE 4: Sustitución -->
+<div class="slide" id="s4">
+  <div class="tag">Parte 3 · Ejemplo aplicado</div>
+  <h2>Resolución por sustitución</h2>
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h3>Despejamos una variable en una ecuación</h3>
+      <p>De la ecuación B, <em>y</em> ya está despejada:</p>
+      <div class="eq">y = 15x</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h3>Sustituimos en la otra ecuación</h3>
+      <div class="eq">15x = 5x + 200</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h3>Resolvemos para x y luego para y</h3>
+      <div class="eq">10x = 200 → x = 20 → y = 15·20 = 300</div>
+    </div>
+  </div>
+  <div class="highlight-box">
+    <p>✅ Solución: <strong style="color:#a78bfa">(x = 20 hs, y = $300)</strong> — En el punto de equilibrio ambos proveedores cuestan lo mismo.</p>
+  </div>
+</div>
+
+<!-- SLIDE 5: Igualación -->
+<div class="slide" id="s5">
+  <div class="tag">Parte 3 · Ejemplo aplicado</div>
+  <h2>Resolución por igualación</h2>
+  <p style="margin-bottom:16px">El método de igualación consiste en despejar la <span class="accent">misma variable</span> en ambas ecuaciones e igualar las expresiones resultantes.</p>
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h3>Despejamos <em>y</em> en ambas ecuaciones</h3>
+      <p>Ya están en forma explícita:</p>
+      <div class="eq">y = 5x + 200 &nbsp;&nbsp;&nbsp;&nbsp; y = 15x</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h3>Igualamos las dos expresiones</h3>
+      <div class="eq">5x + 200 = 15x</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h3>Resolvemos x y luego y</h3>
+      <div class="eq">200 = 10x → x = 20 → y = 15·20 = 300</div>
+    </div>
+  </div>
+  <div class="highlight-box">
+    <p>✅ Misma solución: <strong style="color:#a78bfa">(x = 20 hs, y = $300)</strong> — Ambos métodos llegan al mismo resultado. La diferencia está en el procedimiento, no en la respuesta.</p>
+  </div>
+</div>
+
+<!-- SLIDE 6: Cómo graficar -->
+<div class="slide" id="s6">
+  <div class="tag">Parte 3 · Interpretación gráfica</div>
+  <h2>¿Cómo graficamos las rectas?</h2>
+  <p style="margin-bottom:14px">Para trazar una recta necesitamos <span class="accent">dos puntos</span>. Usamos el método de los interceptos: hacemos <em>x = 0</em> y luego <em>y = 0</em>.</p>
+  <div class="cols">
+    <div>
+      <h3 style="color:#4ade80">Proveedor A: y = 5x + 200</h3>
+      <table class="point-table">
+        <tr><th>x</th><th>y</th><th>Punto</th></tr>
+        <tr><td>0</td><td>200</td><td>(0 , 200) ✅</td></tr>
+        <tr><td>−40</td><td>0</td><td>(−40 , 0) ✅</td></tr>
+      </table>
+      <div class="highlight-box orange" style="margin-top:12px; padding: 12px 16px;">
+        <p style="font-size:15px;">Graficamos con estos dos puntos, pero en el contexto del problema solo consideramos la parte <span class="accent">positiva del eje x</span>, ya que las horas de uso no pueden ser negativas.</p>
+      </div>
+    </div>
+    <div>
+      <h3 style="color:#a78bfa">Proveedor B: y = 15x</h3>
+      <table class="point-table">
+        <tr><th>x</th><th>y</th><th>Punto</th></tr>
+        <tr><td>0</td><td>0</td><td>(0 , 0) ✅</td></tr>
+        <tr><td>20</td><td>300</td><td>(20 , 300) ✅</td></tr>
+      </table>
+      <div class="highlight-box" style="margin-top:12px; padding: 12px 16px;">
+        <p style="font-size:15px;">Esta recta pasa por el origen. Ambos interceptos caen en el mismo punto (0,0), así que tomamos un segundo punto cómodo: x = 20.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: Gráfico -->
+<div class="slide" id="s7">
+  <div class="tag">Parte 3 · Interpretación gráfica</div>
+  <h2>Visualización del sistema</h2>
+  <div class="cols" style="align-items:center">
+    <div>
+      <canvas id="grafico" width="380" height="300"></canvas>
+    </div>
+    <div>
+      <p><span class="accent">Cada ecuación es una recta.</span> La intersección representa la solución del sistema.</p>
+      <br>
+      <ul>
+        <li>Menos de <span class="accent">20 hs</span> → conviene <span style="color:#a78bfa">Proveedor B</span></li>
+        <li>Más de <span class="accent">20 hs</span> → conviene <span style="color:#4ade80">Proveedor A</span></li>
+        <li>Exactamente <span class="accent">20 hs</span> → cuestan lo mismo ($300)</li>
+      </ul>
+      <br>
+      <div class="highlight-box">
+        <p>Este sistema es <span class="accent">compatible determinado</span>: tiene exactamente una solución. Las rectas se cortan en un punto.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: Tipos de sistemas -->
+<div class="slide" id="s8">
+  <div class="tag">Parte 2 · Desarrollo del tema</div>
+  <h2>Tipos de sistemas</h2>
+  <div class="cols">
+    <div>
+      <div class="card purple" style="margin-bottom:14px">
+        <h3>✅ Compatible determinado</h3>
+        <p>Las rectas se cruzan en un punto.<br>Tiene <span class="accent">una solución única</span>.</p>
+        <p style="font-size:14px; color:#666; margin-top:6px">Ej.: nuestro caso — x=20, y=300</p>
+      </div>
+      <div class="card" style="margin-bottom:14px; border-color:#1e5a7a">
+        <h3>♾ Compatible indeterminado</h3>
+        <p>Las rectas son la misma recta.<br>Tiene <span class="accent">infinitas soluciones</span>.</p>
+        <p style="font-size:14px; color:#666; margin-top:6px">Ej.: dos proveedores con precio idéntico</p>
+      </div>
+      <div class="card" style="border-color:#5a1e1e">
+        <h3>✗ Incompatible</h3>
+        <p>Las rectas son paralelas.<br><span class="accent">Sin solución</span>.</p>
+        <p style="font-size:14px; color:#666; margin-top:6px">Ej.: misma pendiente, diferente ordenada</p>
+      </div>
+    </div>
+    <div>
+      <canvas id="tipos" width="380" height="300"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Navegación -->
+<div class="nav">
+  <button onclick="prev()">← Anterior</button>
+  <button onclick="next()">Siguiente →</button>
+</div>
+
+<script>
+  let cur = 0;
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const ids = Array.from(slides).map(s => s.id);
+
+  function show(n) {
+    slides[cur].classList.remove('active');
+    cur = (n + total) % total;
+    slides[cur].classList.add('active');
+    document.getElementById('counter').textContent = (cur+1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((cur+1)/total*100) + '%';
+    if (ids[cur] === 's7') drawGraph();
+    if (ids[cur] === 's8') drawTipos();
+  }
+  function next() { show(cur+1); }
+  function prev() { show(cur-1); }
+  document.addEventListener('keydown', e => {
+    if (e.key==='ArrowRight' || e.key===' ') next();
+    if (e.key==='ArrowLeft') prev();
+  });
+
+  function drawGraph() {
+    const canvas = document.getElementById('grafico');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,380,300);
+    ctx.fillStyle = '#13152a'; ctx.fillRect(0,0,380,300);
+
+    const pad=44, w=380-pad*2, h=300-pad*2;
+    const maxX=40, maxY=700;
+    function px(x){ return pad+(x/maxX)*w; }
+    function py(y){ return pad+h-(y/maxY)*h; }
+
+    ctx.strokeStyle='#232345'; ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){
+      let gx=pad+i*(w/4); ctx.beginPath(); ctx.moveTo(gx,pad); ctx.lineTo(gx,pad+h); ctx.stroke();
+      let gy=pad+i*(h/4); ctx.beginPath(); ctx.moveTo(pad,gy); ctx.lineTo(pad+w,gy); ctx.stroke();
+    }
+    ctx.strokeStyle='#44446a'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,pad+h); ctx.lineTo(pad+w,pad+h); ctx.stroke();
+    ctx.fillStyle='#6666a0'; ctx.font='11px Segoe UI'; ctx.textAlign='center';
+    for(let i=0;i<=4;i++){
+      ctx.fillText(i*10, pad+i*(w/4), pad+h+16);
+      if(i>0){ ctx.textAlign='right'; ctx.fillText('$'+(i*175), pad-5, pad+h-i*(h/4)+4); ctx.textAlign='center'; }
+    }
+    ctx.fillText('Horas (x)', pad+w/2, pad+h+30);
+
+    // B: y=15x
+    ctx.strokeStyle='#a78bfa'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(px(0),py(0)); ctx.lineTo(px(40),py(600)); ctx.stroke();
+    // A: y=5x+200
+    ctx.strokeStyle='#4ade80'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(px(0),py(200)); ctx.lineTo(px(40),py(400)); ctx.stroke();
+
+    // Punto intersección
+    ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.arc(px(20),py(300),6,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#555590'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(px(20),py(300)); ctx.lineTo(px(20),py(0)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px(20),py(300)); ctx.lineTo(px(0),py(300)); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Puntos usados para trazar
+    ctx.fillStyle='#4ade80';
+    ctx.beginPath(); ctx.arc(px(0),py(200),4,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(px(40),py(400),4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#a78bfa';
+    ctx.beginPath(); ctx.arc(px(0),py(0),4,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(px(20),py(300),4,0,Math.PI*2); ctx.fill();
+
+    ctx.fillStyle='#4ade80'; ctx.font='bold 11px Segoe UI'; ctx.textAlign='left';
+    ctx.fillText('A: y=5x+200', px(22),py(370));
+    ctx.fillStyle='#a78bfa';
+    ctx.fillText('B: y=15x', px(22),py(460));
+    ctx.fillStyle='#fff'; ctx.font='bold 11px Segoe UI';
+    ctx.fillText('(20, $300)', px(22),py(315));
+  }
+
+  function drawTipos() {
+    const canvas = document.getElementById('tipos');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,380,300); ctx.fillStyle='#13152a'; ctx.fillRect(0,0,380,300);
+
+    function drawPanel(x,y,w,h,title,color1,color2,type) {
+      ctx.fillStyle='#181c2a'; ctx.fillRect(x,y,w,h);
+      ctx.strokeStyle='#2e2e50'; ctx.lineWidth=1; ctx.strokeRect(x,y,w,h);
+      ctx.fillStyle='#888'; ctx.font='11px Segoe UI'; ctx.textAlign='center';
+      ctx.fillText(title, x+w/2, y+h-8);
+      const cx=x+w/2, cy=y+h/2-8, hl=w*0.42;
+      ctx.lineWidth=2;
+      ctx.strokeStyle=color1;
+      if(type==='det'){
+        ctx.beginPath(); ctx.moveTo(cx-hl,cy+28); ctx.lineTo(cx+hl,cy-28); ctx.stroke();
+        ctx.strokeStyle=color2;
+        ctx.beginPath(); ctx.moveTo(cx-hl,cy-28); ctx.lineTo(cx+hl,cy+28); ctx.stroke();
+        ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2); ctx.fill();
+      } else if(type==='indet'){
+        ctx.beginPath(); ctx.moveTo(cx-hl,cy+8); ctx.lineTo(cx+hl,cy-8); ctx.stroke();
+        ctx.strokeStyle=color2; ctx.setLineDash([5,4]);
+        ctx.beginPath(); ctx.moveTo(cx-hl,cy+8); ctx.lineTo(cx+hl,cy-8); ctx.stroke();
+        ctx.setLineDash([]);
+      } else {
+        ctx.beginPath(); ctx.moveTo(cx-hl,cy+16); ctx.lineTo(cx+hl,cy+16); ctx.stroke();
+        ctx.strokeStyle=color2;
+        ctx.beginPath(); ctx.moveTo(cx-hl,cy-16); ctx.lineTo(cx+hl,cy-16); ctx.stroke();
+      }
+    }
+
+    drawPanel(10,10,110,130,'Compatible det.','#4ade80','#a78bfa','det');
+    drawPanel(135,10,110,130,'Indet. (∞ sol.)','#a78bfa','#fbbf24','indet');
+    drawPanel(260,10,110,130,'Incompatible','#f87171','#fb923c','parallel');
+
+    ctx.strokeStyle='#7c6ee6'; ctx.lineWidth=1.5; ctx.setLineDash([3,3]);
+    ctx.strokeRect(10,10,110,130); ctx.setLineDash([]);
+    ctx.fillStyle='#7c6ee6'; ctx.font='bold 10px Segoe UI'; ctx.textAlign='center';
+    ctx.fillText('← nuestro caso', 65, 155);
+  }
+
+  document.getElementById('progress').style.width = (1/total*100)+'%';
+</script>
+</body>
+</html>
