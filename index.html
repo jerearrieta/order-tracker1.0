@@ -67,7 +67,7 @@
   <h2>La situación profesional</h2>
   <div class="cols">
     <div>
-      <p>Una startup de IA necesita elegir entre dos <span class="accent">proveedores de cloud</span> para alojar su modelo de machine learning.</p>
+      <p>Una emprese que trabaja con inteligencia artificial necesita elegir entre dos <span class="accent">proveedores de nube</span> para alojar su modelo de machine learning.</p>
       <br>
       <p>Cada proveedor tiene una <span class="accent">estructura de costos diferente</span>: uno cobra más por el acceso inicial pero menos por uso, el otro lo hace al revés.</p>
       <br>
@@ -75,13 +75,13 @@
     </div>
     <div>
       <div class="card purple">
-        <h3>☁ Proveedor A — NimboCloud</h3>
+        <h3>☁ Proveedor A — Google</h3>
         <p>Costo mensual fijo: <span class="accent">$200</span></p>
         <p>Costo por hora de cómputo: <span class="accent">$5</span></p>
       </div>
       <br>
       <div class="card green">
-        <h3>🖥 Proveedor B — CoreRack</h3>
+        <h3>🖥 Proveedor B — AWS</h3>
         <p>Sin costo fijo mensual: <span class="accent">$0</span></p>
         <p>Costo por hora de cómputo: <span class="accent">$15</span></p>
       </div>
@@ -95,8 +95,8 @@
   <h2>Plantear el sistema</h2>
   <p>Llamamos <span class="accent">x</span> = horas de uso mensual, y <span class="accent">y</span> = costo total mensual en dólares.</p>
   <br>
-  <div class="eq">Proveedor A:   y = 5x + 200</div>
-  <div class="eq">Proveedor B:   y = 15x</div>
+  <div class="eq">Proveedor A (Google):   y = 5x + 200</div>
+  <div class="eq">Proveedor B (AWS):   y = 15x</div>
   <br>
   <div class="highlight-box">
     <p>Un <span class="accent">Sistema de Ecuaciones Lineales (SEL)</span> es un conjunto de dos o más ecuaciones de primer grado que comparten las mismas incógnitas. La solución es el par (x, y) que satisface <strong>ambas ecuaciones simultáneamente</strong>.</p>
@@ -173,7 +173,7 @@
   <p style="margin-bottom:14px">Para trazar una recta necesitamos <span class="accent">dos puntos</span>. Usamos el método de los interceptos: hacemos <em>x = 0</em> y luego <em>y = 0</em>.</p>
   <div class="cols">
     <div>
-      <h3 style="color:#4ade80">Proveedor A: y = 5x + 200</h3>
+      <h3 style="color:#4ade80">Proveedor A (Google): y = 5x + 200</h3>
       <table class="point-table">
         <tr><th>x</th><th>y</th><th>Punto</th></tr>
         <tr><td>0</td><td>200</td><td>(0 , 200) ✅</td></tr>
@@ -184,7 +184,7 @@
       </div>
     </div>
     <div>
-      <h3 style="color:#a78bfa">Proveedor B: y = 15x</h3>
+      <h3 style="color:#a78bfa">Proveedor B(AWS): y = 15x</h3>
       <table class="point-table">
         <tr><th>x</th><th>y</th><th>Punto</th></tr>
         <tr><td>0</td><td>0</td><td>(0 , 0) ✅</td></tr>
@@ -209,8 +209,8 @@
       <p><span class="accent">Cada ecuación es una recta.</span> La intersección representa la solución del sistema.</p>
       <br>
       <ul>
-        <li>Menos de <span class="accent">20 hs</span> → conviene <span style="color:#a78bfa">Proveedor B</span></li>
-        <li>Más de <span class="accent">20 hs</span> → conviene <span style="color:#4ade80">Proveedor A</span></li>
+        <li>Menos de <span class="accent">20 hs</span> → conviene <span style="color:#a78bfa">Proveedor B (AWS)</span></li>
+        <li>Más de <span class="accent">20 hs</span> → conviene <span style="color:#4ade80">Proveedor A (Google)</span></li>
         <li>Exactamente <span class="accent">20 hs</span> → cuestan lo mismo ($300)</li>
       </ul>
       <br>
@@ -219,7 +219,7 @@
       </div>
       <br>
       <div class="highlight-box orange">
-        <p>🏢 <strong style="color:#fbbf24">Decisión para la empresa:</strong> Si el modelo de IA requiere <span class="accent">más de 20 hs</span> de cómputo mensual, conviene contratar <span style="color:#4ade80">NimboCloud (A)</span>. Ya que el bajo costo por hora compensa el precio fijo. Si el uso es menor a 20 hs, <span style="color:#a78bfa">CoreRack (B)</span> es más económico al no tener cargo fijo.</p>
+        <p>🏢 <strong style="color:#fbbf24">Decisión para la empresa:</strong> Si el modelo de IA requiere <span class="accent">más de 20 hs</span> de cómputo mensual, conviene contratar <span style="color:#4ade80">Google (A)</span>. Ya que el bajo costo por hora compensa el precio fijo. Si el uso es menor a 20 hs, <span style="color:#a78bfa">AWS (B)</span> es más económico al no tener cargo fijo.</p>
       </div>
     </div>
   </div>
