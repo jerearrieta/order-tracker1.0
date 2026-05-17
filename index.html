@@ -399,6 +399,17 @@
       return;
     }
 
+    // Validate: no duplicate ticket+type among active orders
+    const duplicates = tokens.filter(t =>
+      orders.some(o => o.type === selectedType && o.tickets.includes(t))
+    );
+    if (duplicates.length > 0) {
+      const typeLabel = { mobile:'Mobile', pc:'PC', console:'Console' }[selectedType];
+      showInputError('Ya existe una orden ' + typeLabel + ' activa con el ticket: ' + duplicates.join(', '));
+      document.getElementById('inp-tickets').focus();
+      return;
+    }
+
     const tickets = tokens; // already validated as 6-digit strings
     const now = Date.now();
     const order = { id:now, type:selectedType, tickets, raw, desc, start:now, warnAt: now + WARN_MS, expireAt: now + LIMIT_MS, warned:false, expired:false };
