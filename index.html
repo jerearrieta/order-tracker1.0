@@ -1,383 +1,644 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistemas de Ecuaciones Lineales</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e8e8e8; overflow: hidden; }
-  .slide { display: none; width: 100vw; height: 100vh; padding: 50px 80px; flex-direction: column; justify-content: center; position: relative; }
-  .slide.active { display: flex; }
-  .tag { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #7c6ee6; margin-bottom: 18px; }
-  h1 { font-size: 52px; font-weight: 700; line-height: 1.15; color: #fff; }
-  h2 { font-size: 36px; font-weight: 700; color: #fff; margin-bottom: 20px; }
-  h3 { font-size: 20px; font-weight: 600; color: #c8c0f5; margin-bottom: 8px; }
-  p, li { font-size: 18px; line-height: 1.7; color: #c5c5d8; }
-  ul { padding-left: 20px; }
-  li { margin-bottom: 8px; }
-  .subtitle { font-size: 22px; color: #8a87b0; margin-top: 16px; }
-  .accent { color: #a78bfa; font-weight: 600; }
-  .muted { color: #666690; }
-  .badge { display: inline-block; background: #2a2060; color: #a78bfa; border: 1px solid #4a3ea0; border-radius: 6px; padding: 4px 14px; font-size: 14px; font-weight: 600; margin-right: 8px; }
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: start; margin-top: 10px; }
-  .card { background: #181c2a; border: 1px solid #2e2e50; border-radius: 14px; padding: 24px 28px; }
-  .card.purple { border-color: #5b4ecc; }
-  .card.green { border-color: #1e7a5c; }
-  .eq { font-size: 24px; font-weight: 700; color: #fff; font-family: 'Courier New', monospace; margin: 8px 0; background: #13152a; border-left: 4px solid #7c6ee6; padding: 10px 16px; border-radius: 0 8px 8px 0; }
-  .eq.red { border-left-color: #f87171; }
-  .step { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
-  .step-num { background: #7c6ee6; color: #fff; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; margin-top: 2px; }
-  .step-body h3 { margin-bottom: 4px; }
-  canvas { border-radius: 12px; }
-  .nav { position: fixed; bottom: 30px; right: 40px; display: flex; gap: 12px; z-index: 100; }
-  .nav button { background: #2a2060; color: #c8c0f5; border: 1px solid #4a3ea0; border-radius: 10px; padding: 10px 22px; font-size: 15px; cursor: pointer; transition: background 0.2s; }
-  .nav button:hover { background: #3d2f90; }
-  .progress { position: fixed; top: 0; left: 0; height: 3px; background: #7c6ee6; transition: width 0.3s; }
-  .slide-counter { position: fixed; top: 18px; right: 40px; font-size: 13px; color: #555580; }
-  .highlight-box { background: #1a1f35; border: 1px solid #7c6ee6; border-radius: 12px; padding: 18px 22px; margin-top: 16px; }
-  .highlight-box.orange { border-color: #d97706; }
-  .point-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  .point-table th { background: #1e1e3a; color: #a78bfa; font-size: 15px; padding: 8px 14px; text-align: center; border: 1px solid #2e2e50; }
-  .point-table td { padding: 8px 14px; text-align: center; font-size: 16px; border: 1px solid #2e2e50; font-family: 'Courier New', monospace; }
-  .point-table tr:nth-child(even) td { background: #181c2a; }
-  .strike { text-decoration: line-through; color: #666; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Tracker — Mis Órdenes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f0f0f; --bg-surface: #161616; --bg-card: #1c1c1c;
+      --border: #2a2a2a; --border-strong: #3a3a3a;
+      --text-primary: #e8e8e8; --text-secondary: #888; --text-muted: #555;
+      --accent: #f0c040;
+      --warn: #f0a030; --warn-dim: rgba(240,160,48,0.12);
+      --danger: #e05050; --danger-dim: rgba(224,80,80,0.12);
+      --ok: #50c080; --ok-dim: rgba(80,192,128,0.1);
+      --mobile: #7b8ff0; --mobile-dim: rgba(123,143,240,0.12);
+      --pc: #f0c040; --pc-dim: rgba(240,192,64,0.10);
+      --console: #f07060; --console-dim: rgba(240,112,96,0.12);
+      --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
+      --radius: 4px; --radius-lg: 6px;
+    }
+    body { background: var(--bg); color: var(--text-primary); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; }
+    body::before { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px); pointer-events:none; z-index:1000; }
+
+    .header { background:var(--bg-surface); border-bottom:1px solid var(--border); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:56px; position:sticky; top:0; z-index:100; }
+    .header-logo { display:flex; align-items:center; gap:10px; }
+    .logo-mark { width:28px; height:28px; background:var(--accent); display:flex; align-items:center; justify-content:center; border-radius:2px; }
+    .logo-text { font-family:var(--mono); font-size:14px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; }
+    .logo-sub  { font-family:var(--mono); font-size:10px; color:var(--text-muted); letter-spacing:0.12em; text-transform:uppercase; margin-top:1px; }
+    .header-right { display:flex; align-items:center; gap:12px; }
+    .clock { font-family:var(--mono); font-size:13px; color:var(--text-secondary); letter-spacing:0.05em; }
+    .btn-sound { background:transparent; border:1px solid var(--border-strong); border-radius:var(--radius); padding:6px 10px; color:var(--text-muted); cursor:pointer; display:flex; align-items:center; gap:5px; font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; transition:color 0.15s,border-color 0.15s; }
+    .btn-sound:hover { color:var(--text-primary); border-color:var(--text-muted); }
+    .btn-sound.on { color:var(--accent); border-color:var(--accent); }
+
+    .main { max-width:1100px; margin:0 auto; padding:2rem; }
+
+    .stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:2rem; overflow:hidden; }
+    .stat-cell { background:var(--bg-surface); padding:14px 20px; }
+    .stat-label { font-family:var(--mono); font-size:10px; color:var(--text-muted); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px; }
+    .stat-value { font-family:var(--mono); font-size:28px; font-weight:600; line-height:1; }
+    .stat-value.active  { color:var(--text-primary); }
+    .stat-value.warning { color:var(--warn); }
+    .stat-value.danger  { color:var(--danger); }
+    .stat-value.done    { color:var(--ok); }
+
+    .controls { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; gap:12px; flex-wrap:wrap; }
+    .section-title { font-family:var(--mono); font-size:11px; color:var(--text-muted); letter-spacing:0.14em; text-transform:uppercase; }
+    .controls-right { display:flex; gap:8px; }
+
+    .btn-new { display:flex; align-items:center; gap:8px; background:var(--accent); color:#000; border:none; border-radius:var(--radius); padding:9px 18px; font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:opacity 0.15s,transform 0.1s; }
+    .btn-new:hover { opacity:0.88; }
+    .btn-new:active { transform:scale(0.97); }
+
+    .btn-report { display:flex; align-items:center; gap:6px; background:transparent; color:var(--ok); border:1px solid var(--ok); border-radius:var(--radius); padding:9px 14px; font-family:var(--mono); font-size:12px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:background 0.15s; }
+    .btn-report:hover { background:var(--ok-dim); }
+
+    .form-panel { background:var(--bg-surface); border:1px solid var(--accent); border-radius:var(--radius-lg); padding:1.25rem 1.5rem; margin-bottom:1.5rem; display:none; animation:slideDown 0.2s ease; }
+    .form-panel.open { display:block; }
+    @keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+    .form-title { font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:1rem; }
+    .form-row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
+    .form-field { display:flex; flex-direction:column; gap:5px; flex:1; min-width:140px; }
+    .form-label { font-family:var(--mono); font-size:10px; color:var(--text-muted); letter-spacing:0.1em; text-transform:uppercase; }
+    .form-input { background:var(--bg-card); border:1px solid var(--border-strong); border-radius:var(--radius); padding:9px 12px; font-family:var(--mono); font-size:13px; color:var(--text-primary); outline:none; transition:border-color 0.15s; width:100%; }
+    .form-input:focus { border-color:var(--accent); }
+    .form-input::placeholder { color:var(--text-muted); }
+    .form-hint { font-family:var(--mono); font-size:10px; color:var(--text-muted); margin-top:4px; }
+
+    .type-selector { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+    .type-btn { background:var(--bg-card); border:1px solid var(--border-strong); border-radius:var(--radius); padding:8px 16px; font-family:var(--mono); font-size:11px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; color:var(--text-muted); transition:all 0.15s; white-space:nowrap; }
+    .type-btn:hover { border-color:var(--text-secondary); color:var(--text-primary); }
+    .type-btn.active[data-type="mobile"]  { border-color:var(--mobile);  color:var(--mobile);  background:var(--mobile-dim); }
+    .type-btn.active[data-type="pc"]      { border-color:var(--pc);      color:#000;            background:var(--pc); }
+    .type-btn.active[data-type="console"] { border-color:var(--console); color:var(--console); background:var(--console-dim); }
+
+    .form-actions { display:flex; gap:8px; align-items:flex-end; }
+    .btn-submit { background:var(--accent); color:#000; border:none; border-radius:var(--radius); padding:9px 20px; font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; white-space:nowrap; transition:opacity 0.15s; }
+    .btn-submit:hover { opacity:0.88; }
+    .btn-cancel { background:transparent; color:var(--text-muted); border:1px solid var(--border-strong); border-radius:var(--radius); padding:9px 16px; font-family:var(--mono); font-size:12px; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer; white-space:nowrap; transition:border-color 0.15s,color 0.15s; }
+    .btn-cancel:hover { border-color:var(--text-muted); color:var(--text-primary); }
+
+    .cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+    .empty-state { grid-column:1/-1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4rem 2rem; border:1px dashed var(--border-strong); border-radius:var(--radius-lg); color:var(--text-muted); text-align:center; gap:12px; }
+    .empty-icon { width:48px; height:48px; opacity:0.3; }
+    .empty-text { font-family:var(--mono); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+
+    .order-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:12px; transition:border-color 0.3s,background 0.3s; animation:cardIn 0.25s ease; position:relative; overflow:hidden; }
+    @keyframes cardIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    .order-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; transition:background 0.3s; }
+    .order-card[data-type="mobile"]::before  { background:var(--mobile); }
+    .order-card[data-type="pc"]::before      { background:var(--pc); }
+    .order-card[data-type="console"]::before { background:var(--console); }
+    .order-card.warn   { border-color:#3a2e18; background:#1a1810; }
+    .order-card.danger { border-color:#3a1818; background:#1a1010; animation:cardIn 0.25s ease,pulse-border 1.2s infinite; }
+    @keyframes pulse-border { 0%,100%{border-color:#3a1818} 50%{border-color:#7a2020} }
+
+    .card-header { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+    .card-header-left { display:flex; flex-direction:column; gap:5px; flex:1; min-width:0; }
+    .ticket-id { font-family:var(--mono); font-size:13px; font-weight:600; color:var(--text-primary); letter-spacing:0.04em; word-break:break-all; line-height:1.5; }
+    .type-pill { display:inline-block; font-family:var(--mono); font-size:9px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; padding:2px 7px; border-radius:2px; }
+    .type-pill.mobile  { background:var(--mobile-dim);  color:var(--mobile);  border:1px solid rgba(123,143,240,0.25); }
+    .type-pill.pc      { background:var(--pc-dim);      color:#a07010;        border:1px solid rgba(240,192,64,0.25); }
+    .type-pill.console { background:var(--console-dim); color:var(--console); border:1px solid rgba(240,112,96,0.25); }
+    .btn-done { background:transparent; border:1px solid var(--border-strong); border-radius:var(--radius); padding:4px 10px; font-family:var(--mono); font-size:10px; color:var(--text-muted); letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:border-color 0.15s,color 0.15s,background 0.15s; }
+    .btn-done:hover { border-color:var(--ok); color:var(--ok); background:var(--ok-dim); }
+    .btn-delete { background:transparent; border:1px solid var(--border-strong); border-radius:var(--radius); padding:4px 8px; font-size:12px; cursor:pointer; flex-shrink:0; transition:border-color 0.15s,background 0.15s; }
+    .btn-delete:hover { border-color:var(--danger); background:var(--danger-dim); }
+    .card-desc { font-size:12px; color:var(--text-muted); font-style:italic; }
+
+    .timer-section { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+    .timer-display { font-family:var(--mono); font-size:32px; font-weight:600; letter-spacing:0.04em; color:var(--ok); font-variant-numeric:tabular-nums; line-height:1; transition:color 0.3s; }
+    .order-card.warn   .timer-display { color:var(--warn); }
+    .order-card.danger .timer-display { color:var(--danger); }
+    .status-badge { font-family:var(--mono); font-size:10px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; padding:4px 10px; border-radius:2px; background:var(--ok-dim); color:var(--ok); border:1px solid rgba(80,192,128,0.2); transition:all 0.3s; white-space:nowrap; }
+    .order-card.warn   .status-badge { background:var(--warn-dim);   color:var(--warn);   border-color:rgba(240,160,48,0.2); }
+    .order-card.danger .status-badge { background:var(--danger-dim); color:var(--danger); border-color:rgba(224,80,80,0.2); }
+
+    .progress-track { height:2px; background:var(--border); border-radius:99px; overflow:hidden; }
+    .progress-fill  { height:100%; border-radius:99px; background:var(--ok); transition:width 1s linear,background 0.3s; }
+    .order-card.warn   .progress-fill { background:var(--warn); }
+    .order-card.danger .progress-fill { background:var(--danger); }
+
+    .card-footer { display:flex; align-items:center; justify-content:space-between; font-family:var(--mono); font-size:10px; color:var(--text-muted); letter-spacing:0.06em; }
+
+    /* Modal */
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:500; display:none; align-items:center; justify-content:center; padding:2rem; }
+    .modal-backdrop.open { display:flex; }
+    .modal { background:var(--bg-surface); border:1px solid var(--border-strong); border-radius:var(--radius-lg); width:100%; max-width:660px; max-height:88vh; display:flex; flex-direction:column; animation:slideDown 0.2s ease; }
+    .modal-header { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.5rem; border-bottom:1px solid var(--border); }
+    .modal-title { font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--ok); }
+    .btn-modal-close { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px; line-height:1; padding:0; }
+    .btn-modal-close:hover { color:var(--text-primary); }
+    .modal-body { padding:1.25rem 1.5rem; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:12px; }
+    .report-textarea { background:var(--bg-card); border:1px solid var(--border-strong); border-radius:var(--radius); padding:12px; font-family:var(--mono); font-size:12px; line-height:1.7; color:var(--text-primary); width:100%; min-height:300px; resize:vertical; outline:none; transition:border-color 0.15s; }
+    .report-textarea:focus { border-color:var(--ok); }
+    .modal-footer { display:flex; gap:8px; justify-content:flex-end; padding:1rem 1.5rem; border-top:1px solid var(--border); flex-wrap:wrap; }
+    .btn-copy { background:var(--ok); color:#000; border:none; border-radius:var(--radius); padding:9px 20px; font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:opacity 0.15s; }
+    .btn-copy:hover { opacity:0.88; }
+    .btn-reset { background:transparent; color:var(--danger); border:1px solid var(--danger); border-radius:var(--radius); padding:9px 14px; font-family:var(--mono); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:background 0.15s; }
+    .btn-reset:hover { background:var(--danger-dim); }
+
+    /* Notifs */
+    .notif-overlay { position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:10px; z-index:9000; pointer-events:none; }
+    .notif { background:var(--bg-surface); border:1px solid var(--border-strong); border-radius:var(--radius-lg); padding:14px 18px; max-width:320px; display:flex; align-items:flex-start; gap:12px; pointer-events:all; animation:notifIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes notifIn { from{opacity:0;transform:translateX(20px) scale(0.95)} to{opacity:1;transform:translateX(0) scale(1)} }
+    .notif.warn   { border-color:var(--warn); }
+    .notif.danger { border-color:var(--danger); }
+    .notif-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+    .notif.warn   .notif-dot { background:var(--warn); }
+    .notif.danger .notif-dot { background:var(--danger); box-shadow:0 0 0 3px rgba(224,80,80,0.2); }
+    .notif-body { flex:1; }
+    .notif-title { font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:4px; }
+    .notif.warn   .notif-title { color:var(--warn); }
+    .notif.danger .notif-title { color:var(--danger); }
+    .notif-msg { font-size:13px; color:var(--text-secondary); line-height:1.4; }
+    .notif-close { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px; line-height:1; padding:0; flex-shrink:0; }
+    .notif-close:hover { color:var(--text-primary); }
+
+    @media (max-width:640px) {
+      .main { padding:1rem; }
+      .header { padding:0 1rem; }
+      .stats-bar { grid-template-columns:repeat(2,1fr); }
+      .timer-display { font-size:26px; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="progress" id="progress"></div>
-<div class="slide-counter" id="counter">1 / 8</div>
-
-<!-- SLIDE 1: Portada -->
-<div class="slide active" id="s1">
-  <div class="tag">Álgebra I · IES Siglo 21</div>
-  <h1>Sistemas de<br>Ecuaciones Lineales</h1>
-  <div style="margin-top: 40px; display:flex; gap: 10px; flex-wrap: wrap;">
-    <span class="badge">Resolución por sustitución</span>
-    <span class="badge">Resolución por igualación</span>
-    <span class="badge">Interpretación gráfica</span>
-    <span class="badge">Tipos de sistemas</span>
-  </div>
-</div>
-
-<!-- SLIDE 2: Situación real -->
-<div class="slide" id="s2">
-  <div class="tag">Parte 1 · Introducción</div>
-  <h2>La situación profesional</h2>
-  <div class="cols">
-    <div>
-      <p>Una emprese que trabaja con inteligencia artificial necesita elegir entre dos <span class="accent">proveedores de nube</span> para alojar su modelo de machine learning.</p>
-      <br>
-      <p>Cada proveedor tiene una <span class="accent">estructura de costos diferente</span>: uno cobra más por el acceso inicial pero menos por uso, el otro lo hace al revés.</p>
-      <br>
-      <p>La pregunta que resuelve la matemática: <span class="accent">¿Cual es el plan mas conveniente para la empresa?</span></p>
+<header class="header">
+  <div class="header-logo">
+    <div class="logo-mark">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" fill="#000"/><rect x="9" y="2" width="5" height="5" fill="#000"/><rect x="2" y="9" width="5" height="5" fill="#000"/><rect x="9" y="11" width="2" height="4" fill="#000"/><rect x="13" y="9" width="2" height="2" fill="#000"/><rect x="9" y="9" width="2" height="2" fill="#000"/></svg>
     </div>
     <div>
-      <div class="card purple">
-        <h3>☁ Proveedor A — Google</h3>
-        <p>Costo fijo: <span class="accent">$200</span></p>
-        <p>Costo por hora de cómputo: <span class="accent">$5</span></p>
+      <div class="logo-text">Order Tracker</div>
+      <div class="logo-sub">Sistema de órdenes</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="btn-sound on" id="btn-sound" onclick="toggleSound()">
+      <span id="sound-icon">🔔</span><span id="sound-label">Sonido</span>
+    </button>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="stats-bar">
+    <div class="stat-cell"><div class="stat-label">// Activas</div><div class="stat-value active" id="stat-active">0</div></div>
+    <div class="stat-cell"><div class="stat-label">// Por vencer</div><div class="stat-value warning" id="stat-warn">0</div></div>
+    <div class="stat-cell"><div class="stat-label">// Vencidas</div><div class="stat-value danger" id="stat-expired">0</div></div>
+    <div class="stat-cell"><div class="stat-label">// Completadas</div><div class="stat-value done" id="stat-done">0</div></div>
+  </div>
+
+  <div class="controls">
+    <span class="section-title">// Órdenes en curso</span>
+    <div class="controls-right">
+      <button class="btn-report" onclick="openReport()">📋 End Duty Report</button>
+      <button class="btn-new" id="btn-new" onclick="toggleForm()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
+        Nueva orden
+      </button>
+    </div>
+  </div>
+
+  <div class="form-panel" id="form-panel">
+    <div class="form-title">// Registrar nueva orden</div>
+    <div class="type-selector">
+      <button class="type-btn active" data-type="mobile"  onclick="selectType('mobile')">📱 Mobile</button>
+      <button class="type-btn"        data-type="pc"      onclick="selectType('pc')">🖥 PC</button>
+      <button class="type-btn"        data-type="console" onclick="selectType('console')">🎮 Console</button>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label" for="inp-tickets">Números de ticket (pueden ser varios)</label>
+        <input class="form-input" type="text" id="inp-tickets" placeholder="889758 889759 889760" />
+        <span class="form-hint">Separalos con espacios o comas</span>
       </div>
-      <br>
-      <div class="card green">
-        <h3>🖥 Proveedor B — AWS</h3>
-        <p>Sin costo fijo: <span class="accent">$0</span></p>
-        <p>Costo por hora de cómputo: <span class="accent">$15</span></p>
+      <div class="form-field" style="max-width:220px;">
+        <label class="form-label" for="inp-desc">Descripción (opcional)</label>
+        <input class="form-input" type="text" id="inp-desc" placeholder="Breve detalle..." />
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- SLIDE 3: Planteamiento -->
-<div class="slide" id="s3">
-  <div class="tag">Parte 2 · Desarrollo del tema</div>
-  <h2>Plantear el sistema</h2>
-  <p>Llamamos <span class="accent">x</span> = horas de uso, y <span class="accent">y</span> = costo total en dólares.</p>
-  <br>
-  <div class="eq">Proveedor A (Google):   y = 5x + 200</div>
-  <div class="eq">Proveedor B (AWS):   y = 15x</div>
-  <br>
-  <div class="highlight-box">
-    <p>Un <span class="accent">Sistema de Ecuaciones Lineales (SEL)</span> es un conjunto de dos o más ecuaciones de primer grado que comparten las mismas incógnitas. La solución es el par (x, y) que satisface <strong>ambas ecuaciones simultáneamente</strong>.</p>
-  </div>
-</div>
-
-<!-- SLIDE 4: Sustitución -->
-<div class="slide" id="s4">
-  <div class="tag">Parte 3 · Ejemplo aplicado</div>
-  <h2>Resolución por sustitución</h2>
-  <div class="step">
-    <div class="step-num">1</div>
-    <div class="step-body">
-      <h3>Despejamos una variable en una ecuación</h3>
-      <p>De la ecuación B, <em>y</em> ya está despejada:</p>
-      <div class="eq">y = 15x</div>
-    </div>
-  </div>
-  <div class="step">
-    <div class="step-num">2</div>
-    <div class="step-body">
-      <h3>Sustituimos en la otra ecuación</h3>
-      <div class="eq">15x = 5x + 200</div>
-    </div>
-  </div>
-  <div class="step">
-    <div class="step-num">3</div>
-    <div class="step-body">
-      <h3>Resolvemos para x y luego para y</h3>
-      <div class="eq">10x = 200 → x = 20 → y = 15·20 = 300</div>
-    </div>
-  </div>
-  <div class="highlight-box">
-    <p>✅ Solución: <strong style="color:#a78bfa">(x = 20 hs, y = $300)</strong> — En el punto de equilibrio ambos proveedores cuestan lo mismo.</p>
-  </div>
-</div>
-
-<!-- SLIDE 5: Igualación -->
-<div class="slide" id="s5">
-  <div class="tag">Parte 3 · Ejemplo aplicado</div>
-  <h2>Resolución por igualación</h2>
-  <p style="margin-bottom:16px">El método de igualación consiste en despejar la <span class="accent">misma variable</span> en ambas ecuaciones e igualar las expresiones resultantes.</p>
-  <div class="step">
-    <div class="step-num">1</div>
-    <div class="step-body">
-      <h3>Despejamos <em>y</em> en ambas ecuaciones</h3>
-      <p>Ya están en forma explícita:</p>
-      <div class="eq">y = 5x + 200 &nbsp;&nbsp;&nbsp;&nbsp; y = 15x</div>
-    </div>
-  </div>
-  <div class="step">
-    <div class="step-num">2</div>
-    <div class="step-body">
-      <h3>Igualamos las dos expresiones</h3>
-      <div class="eq">5x + 200 = 15x</div>
-    </div>
-  </div>
-  <div class="step">
-    <div class="step-num">3</div>
-    <div class="step-body">
-      <h3>Resolvemos x y luego y</h3>
-      <div class="eq">200 = 10x → x = 20 → y = 15·20 = 300</div>
-    </div>
-  </div>
-  <div class="highlight-box">
-    <p>✅ Misma solución: <strong style="color:#a78bfa">(x = 20 hs, y = $300)</strong> — Ambos métodos llegan al mismo resultado. La diferencia está en el procedimiento, no en la respuesta.</p>
-  </div>
-</div>
-
-<!-- SLIDE 6: Cómo graficar -->
-<div class="slide" id="s6">
-  <div class="tag">Parte 3 · Interpretación gráfica</div>
-  <h2>¿Cómo graficamos las rectas?</h2>
-  <p style="margin-bottom:14px">Para trazar una recta necesitamos <span class="accent">dos puntos</span>. Usamos el método de los interceptos: hacemos <em>x = 0</em> y luego <em>y = 0</em>.</p>
-  <div class="cols">
-    <div>
-      <h3 style="color:#4ade80">Proveedor A (Google): y = 5x + 200</h3>
-      <table class="point-table">
-        <tr><th>x</th><th>y</th><th>Punto</th></tr>
-        <tr><td>0</td><td>200</td><td>(0 , 200) ✅</td></tr>
-        <tr><td>−40</td><td>0</td><td>(−40 , 0) ✅</td></tr>
-      </table>
-      <div class="highlight-box orange" style="margin-top:12px; padding: 12px 16px;">
-        <p style="font-size:15px;">Graficamos con estos dos puntos, pero en el contexto del problema solo consideramos la parte <span class="accent">positiva del eje x</span>, ya que las horas de uso no pueden ser negativas.</p>
-      </div>
-    </div>
-    <div>
-      <h3 style="color:#a78bfa">Proveedor B(AWS): y = 15x</h3>
-      <table class="point-table">
-        <tr><th>x</th><th>y</th><th>Punto</th></tr>
-        <tr><td>0</td><td>0</td><td>(0 , 0) ✅</td></tr>
-        <tr><td>20</td><td>300</td><td>(20 , 300) ✅</td></tr>
-      </table>
-      <div class="highlight-box" style="margin-top:12px; padding: 12px 16px;">
-        <p style="font-size:15px;">Esta recta pasa por el origen. Ambos interceptos caen en el mismo punto (0,0), así que tomamos un segundo punto cómodo: x = 20.</p>
+      <div class="form-actions">
+        <button class="btn-submit" onclick="addOrder()">Iniciar timer</button>
+        <button class="btn-cancel" onclick="toggleForm()">Cancelar</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- SLIDE 7: Gráfico -->
-<div class="slide" id="s7">
-  <div class="tag">Parte 3 · Interpretación gráfica</div>
-  <h2>Visualización del sistema</h2>
-  <div class="cols" style="align-items:center">
-    <div>
-      <canvas id="grafico" width="380" height="300"></canvas>
-    </div>
-    <div>
-      <p><span class="accent">Cada ecuación es una recta.</span> La intersección representa la solución del sistema.</p>
-      <br>
-      <ul>
-        <li>Menos de <span class="accent">20 hs</span> → conviene <span style="color:#a78bfa">Proveedor B (AWS)</span></li>
-        <li>Más de <span class="accent">20 hs</span> → conviene <span style="color:#4ade80">Proveedor A (Google)</span></li>
-        <li>Exactamente <span class="accent">20 hs</span> → cuestan lo mismo ($300)</li>
-      </ul>
-      <br>
-      <div class="highlight-box">
-        <p>Este sistema es <span class="accent">compatible determinado</span>: tiene exactamente una solución. Las rectas se cortan en un punto.</p>
-      </div>
-      <br>
-      <div class="highlight-box orange">
-        <p>🏢 <strong style="color:#fbbf24">Decisión para la empresa:</strong> A las 20hs de uso ambos proveedores tienen el mismo costo: $300. Si se requiere usar <span class="accent">más de 20 hs</span>, conviene <span style="color:#4ade80">Google (A)</span>: aunque tiene un costo fijo más caro, su precio por hora es menor y hace que el costo total crezca más lento. Si el uso es de <span class="accent">menos de 20 hs</span>, conviene <span style="color:#a78bfa">AWS (B)</span>: no tiene costo inicial, pero al cobrar más por hora, si se pasa de las 20 hs se vuelve más caro.</p>
+  <div class="cards-grid" id="cards-grid">
+    <div class="empty-state" id="empty-state">
+      <svg class="empty-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="8" width="32" height="32" rx="4" stroke="currentColor" stroke-width="2"/><path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="empty-text">Sin órdenes activas</span>
     </div>
   </div>
-</div>
-</div>
+</main>
 
-<!-- SLIDE 8: Tipos de sistemas -->
-<div class="slide" id="s8">
-  <div class="tag">Parte 3 · Interpretación gráfica</div>
-  <h2>Tipos de sistemas</h2>
-  <div class="cols">
-    <div>
-      <div class="card purple" style="margin-bottom:14px">
-        <h3>✅ Compatible determinado</h3>
-        <p>Las rectas se cruzan en un punto.<br>Tiene <span class="accent">una solución única</span>.</p>
-        <p style="font-size:14px; color:#666; margin-top:6px">Ej: nuestro caso: dos proveedores con distinto precio por hora (distinta pendiente)</p>
-      </div>
-      <div class="card" style="margin-bottom:14px; border-color:#1e5a7a">
-        <h3>♾ Compatible indeterminado</h3>
-        <p>Las rectas son la misma recta.<br>Tiene <span class="accent">infinitas soluciones</span>.</p>
-        <p style="font-size:14px; color:#666; margin-top:6px">Ej: dos proveedores con exactamente el mismo costo fijo y mismo precio por hora (misma pendiente y ordenada al origen)</p>
-      </div>
-      <div class="card" style="border-color:#5a1e1e">
-        <h3>✗ Incompatible</h3>
-        <p>Las rectas son paralelas.<br><span class="accent">Sin solución</span>.</p>
-        <p style="font-size:14px; color:#666; margin-top:6px">Ej: dos proveedores con el mismo precio por hora pero distinto costo fijo (misma pendiente y distinta ordenada al origen)</p>
-      </div>
+<!-- Report Modal -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="closeReportOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📋 End Duty Report</span>
+      <button class="btn-modal-close" onclick="closeReport()">✕</button>
     </div>
-    <div>
-      <canvas id="tipos" width="380" height="300"></canvas>
+    <div class="modal-body">
+      <div class="form-field">
+        <label class="form-label" for="inp-name">Tu nombre</label>
+        <input class="form-input" type="text" id="inp-name" placeholder="Jeremías" oninput="savePrefs(); refreshReport()" style="max-width:240px;" />
+      </div>
+      <textarea class="report-textarea" id="report-textarea" spellcheck="false" readonly></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-reset" onclick="resetReport()">🗑 Resetear turno</button>
+      <button class="btn-cancel" onclick="closeReport()">Cerrar</button>
+      <button class="btn-copy" id="btn-copy" onclick="copyReport()">📋 Copiar</button>
     </div>
   </div>
 </div>
 
-<!-- Navegación -->
-<div class="nav">
-  <button onclick="prev()">← Anterior</button>
-  <button onclick="next()">Siguiente →</button>
-</div>
+<div class="notif-overlay" id="notif-overlay"></div>
 
 <script>
-  let cur = 0;
-  const slides = document.querySelectorAll('.slide');
-  const total = slides.length;
-  const ids = Array.from(slides).map(s => s.id);
+  const WARN_MS  = 15 * 60 * 1000;
+  const LIMIT_MS = 30 * 60 * 1000;
 
-  function show(n) {
-    slides[cur].classList.remove('active');
-    cur = (n + total) % total;
-    slides[cur].classList.add('active');
-    document.getElementById('counter').textContent = (cur+1) + ' / ' + total;
-    document.getElementById('progress').style.width = ((cur+1)/total*100) + '%';
-    if (ids[cur] === 's7') drawGraph();
-    if (ids[cur] === 's8') drawTipos();
+  let orders       = [];
+  let doneCount    = 0;
+  let soundOn      = true;
+  let audioCtx     = null;
+  let selectedType = 'mobile';
+  let report       = { mobile: [], pc: [], console: [] };
+
+  // ── Persistence ──────────────────────────────────────────────
+  function saveState() {
+    localStorage.setItem('ot_report',    JSON.stringify(report));
+    localStorage.setItem('ot_doneCount', String(doneCount));
+    localStorage.setItem('ot_orders',    JSON.stringify(orders));
   }
-  function next() { show(cur+1); }
-  function prev() { show(cur-1); }
-  document.addEventListener('keydown', e => {
-    if (e.key==='ArrowRight' || e.key===' ') next();
-    if (e.key==='ArrowLeft') prev();
-  });
-
-  function drawGraph() {
-    const canvas = document.getElementById('grafico');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0,0,380,300);
-    ctx.fillStyle = '#13152a'; ctx.fillRect(0,0,380,300);
-
-    const pad=44, w=380-pad*2, h=300-pad*2;
-    const maxX=40, maxY=700;
-    function px(x){ return pad+(x/maxX)*w; }
-    function py(y){ return pad+h-(y/maxY)*h; }
-
-    ctx.strokeStyle='#232345'; ctx.lineWidth=1;
-    for(let i=0;i<=4;i++){
-      let gx=pad+i*(w/4); ctx.beginPath(); ctx.moveTo(gx,pad); ctx.lineTo(gx,pad+h); ctx.stroke();
-      let gy=pad+i*(h/4); ctx.beginPath(); ctx.moveTo(pad,gy); ctx.lineTo(pad+w,gy); ctx.stroke();
-    }
-    ctx.strokeStyle='#44446a'; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,pad+h); ctx.lineTo(pad+w,pad+h); ctx.stroke();
-    ctx.fillStyle='#6666a0'; ctx.font='11px Segoe UI'; ctx.textAlign='center';
-    for(let i=0;i<=4;i++){
-      ctx.fillText(i*10, pad+i*(w/4), pad+h+16);
-      if(i>0){ ctx.textAlign='right'; ctx.fillText('$'+(i*175), pad-5, pad+h-i*(h/4)+4); ctx.textAlign='center'; }
-    }
-    ctx.fillText('Horas (x)', pad+w/2, pad+h+30);
-
-    // B: y=15x
-    ctx.strokeStyle='#a78bfa'; ctx.lineWidth=2.5;
-    ctx.beginPath(); ctx.moveTo(px(0),py(0)); ctx.lineTo(px(40),py(600)); ctx.stroke();
-    // A: y=5x+200
-    ctx.strokeStyle='#4ade80'; ctx.lineWidth=2.5;
-    ctx.beginPath(); ctx.moveTo(px(0),py(200)); ctx.lineTo(px(40),py(400)); ctx.stroke();
-
-    // Punto intersección
-    ctx.fillStyle='#fff';
-    ctx.beginPath(); ctx.arc(px(20),py(300),6,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle='#555590'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
-    ctx.beginPath(); ctx.moveTo(px(20),py(300)); ctx.lineTo(px(20),py(0)); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(px(20),py(300)); ctx.lineTo(px(0),py(300)); ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Puntos usados para trazar
-    ctx.fillStyle='#4ade80';
-    ctx.beginPath(); ctx.arc(px(0),py(200),4,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(px(40),py(400),4,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#a78bfa';
-    ctx.beginPath(); ctx.arc(px(0),py(0),4,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(px(20),py(300),4,0,Math.PI*2); ctx.fill();
-
-    ctx.fillStyle='#4ade80'; ctx.font='bold 11px Segoe UI'; ctx.textAlign='left';
-    ctx.fillText('A: y=5x+200', px(22),py(370));
-    ctx.fillStyle='#a78bfa';
-    ctx.fillText('B: y=15x', px(22),py(460));
-    ctx.fillStyle='#fff'; ctx.font='bold 11px Segoe UI';
-    ctx.fillText('(20, $300)', px(22),py(315));
-  }
-
-  function drawTipos() {
-    const canvas = document.getElementById('tipos');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0,0,380,300); ctx.fillStyle='#13152a'; ctx.fillRect(0,0,380,300);
-
-    function drawPanel(x,y,w,h,title,color1,color2,type) {
-      ctx.fillStyle='#181c2a'; ctx.fillRect(x,y,w,h);
-      ctx.strokeStyle='#2e2e50'; ctx.lineWidth=1; ctx.strokeRect(x,y,w,h);
-      ctx.fillStyle='#888'; ctx.font='11px Segoe UI'; ctx.textAlign='center';
-      ctx.fillText(title, x+w/2, y+h-8);
-      const cx=x+w/2, cy=y+h/2-8, hl=w*0.42;
-      ctx.lineWidth=2;
-      ctx.strokeStyle=color1;
-      if(type==='det'){
-        ctx.beginPath(); ctx.moveTo(cx-hl,cy+28); ctx.lineTo(cx+hl,cy-28); ctx.stroke();
-        ctx.strokeStyle=color2;
-        ctx.beginPath(); ctx.moveTo(cx-hl,cy-28); ctx.lineTo(cx+hl,cy+28); ctx.stroke();
-        ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2); ctx.fill();
-      } else if(type==='indet'){
-        ctx.beginPath(); ctx.moveTo(cx-hl,cy+8); ctx.lineTo(cx+hl,cy-8); ctx.stroke();
-        ctx.strokeStyle=color2; ctx.setLineDash([5,4]);
-        ctx.beginPath(); ctx.moveTo(cx-hl,cy+8); ctx.lineTo(cx+hl,cy-8); ctx.stroke();
-        ctx.setLineDash([]);
-      } else {
-        ctx.beginPath(); ctx.moveTo(cx-hl,cy+16); ctx.lineTo(cx+hl,cy+16); ctx.stroke();
-        ctx.strokeStyle=color2;
-        ctx.beginPath(); ctx.moveTo(cx-hl,cy-16); ctx.lineTo(cx+hl,cy-16); ctx.stroke();
+  function loadState() {
+    try {
+      const r = localStorage.getItem('ot_report');
+      if (r) report = JSON.parse(r);
+      doneCount = parseInt(localStorage.getItem('ot_doneCount') || '0') || 0;
+      const o = localStorage.getItem('ot_orders');
+      if (o) {
+        orders = JSON.parse(o);
+        // Recalculate warnAt/expireAt in case they were missing (legacy data)
+        orders.forEach(ord => {
+          if (!ord.warnAt)   ord.warnAt   = ord.start + WARN_MS;
+          if (!ord.expireAt) ord.expireAt  = ord.start + LIMIT_MS;
+        });
       }
-    }
-
-    drawPanel(10,10,110,130,'Compatible det.','#4ade80','#a78bfa','det');
-    drawPanel(135,10,110,130,'Indet. (∞ sol.)','#a78bfa','#fbbf24','indet');
-    drawPanel(260,10,110,130,'Incompatible','#f87171','#fb923c','parallel');
-
-    ctx.strokeStyle='#7c6ee6'; ctx.lineWidth=1.5; ctx.setLineDash([3,3]);
-    ctx.strokeRect(10,10,110,130); ctx.setLineDash([]);
-    ctx.fillStyle='#7c6ee6'; ctx.font='bold 10px Segoe UI'; ctx.textAlign='center';
-    ctx.fillText('← nuestro caso', 65, 155);
+    } catch(e) {}
+  }
+  function savePrefs() {
+    const n = document.getElementById('inp-name').value.trim();
+    if (n) localStorage.setItem('ot_name', n);
+  }
+  function loadPrefs() {
+    const n = localStorage.getItem('ot_name');
+    if (n) document.getElementById('inp-name').value = n;
   }
 
-  document.getElementById('progress').style.width = (1/total*100)+'%';
+  // ── Clock ────────────────────────────────────────────────────
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      String(now.getHours()).padStart(2,'0') + ':' +
+      String(now.getMinutes()).padStart(2,'0') + ':' +
+      String(now.getSeconds()).padStart(2,'0');
+  }
+
+  // ── Sound ────────────────────────────────────────────────────
+  function toggleSound() {
+    soundOn = !soundOn;
+    document.getElementById('sound-icon').textContent  = soundOn ? '🔔' : '🔕';
+    document.getElementById('sound-label').textContent = soundOn ? 'Sonido' : 'Mute';
+    document.getElementById('btn-sound').classList.toggle('on', soundOn);
+  }
+  function playBeep(freq=880, dur=0.2, type='sine') {
+    if (!soundOn) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.type = type; o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur);
+      o.start(audioCtx.currentTime); o.stop(audioCtx.currentTime+dur);
+    } catch(e){}
+  }
+  function playWarnSound()   { playBeep(660,0.15); setTimeout(()=>playBeep(660,0.15),200); setTimeout(()=>playBeep(880,0.3),400); }
+  function playDangerSound() { [0,180,360,540].forEach(d=>setTimeout(()=>playBeep(440,0.12,'sawtooth'),d)); }
+
+  // ── Type selector ────────────────────────────────────────────
+  function selectType(t) {
+    selectedType = t;
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type===t));
+  }
+
+  // ── Form ─────────────────────────────────────────────────────
+  function toggleForm() {
+    const p = document.getElementById('form-panel');
+    p.classList.toggle('open');
+    if (p.classList.contains('open')) {
+      document.getElementById('inp-tickets').focus();
+      document.getElementById('btn-new').textContent = '— Cerrar';
+    } else {
+      document.getElementById('btn-new').innerHTML =
+        `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg> Nueva orden`;
+    }
+  }
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function fmtTime(ms) {
+    if (ms<=0) return '00:00';
+    return String(Math.floor(ms/60000)).padStart(2,'0') + ':' + String(Math.floor((ms%60000)/1000)).padStart(2,'0');
+  }
+  function fmtHHMM(ts) {
+    const d=new Date(ts);
+    return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  }
+
+  function parseTickets(raw) {
+    return raw.split(/[\s,]+/).map(t=>t.trim()).filter(t=>/^\d+$/.test(t));
+  }
+
+  // ── Validation ───────────────────────────────────────────────
+  function showInputError(msg) {
+    let el = document.getElementById('inp-error');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'inp-error';
+      el.style.cssText = 'font-family:var(--mono);font-size:11px;color:var(--danger);margin-top:6px;padding:6px 10px;background:var(--danger-dim);border:1px solid rgba(224,80,80,0.25);border-radius:var(--radius);';
+      document.getElementById('inp-tickets').parentNode.appendChild(el);
+    }
+    el.textContent = '⚠ ' + msg;
+    el.style.display = 'block';
+    setTimeout(() => { if(el) el.style.display='none'; }, 4000);
+  }
+
+  // ── Add Order ────────────────────────────────────────────────
+  function addOrder() {
+    const raw  = document.getElementById('inp-tickets').value.trim();
+    const desc = document.getElementById('inp-desc').value.trim();
+    if (!raw) { document.getElementById('inp-tickets').focus(); return; }
+
+    // Validate: all tokens must be exactly 6 digits
+    const tokens = raw.split(/[\s,]+/).map(t=>t.trim()).filter(Boolean);
+    const invalid = tokens.filter(t => !/^\d{6}$/.test(t));
+    if (invalid.length > 0) {
+      showInputError(`Los siguientes números no son válidos (deben tener exactamente 6 dígitos): ${invalid.join(', ')}`);
+      document.getElementById('inp-tickets').focus();
+      return;
+    }
+
+    const tickets = tokens; // already validated as 6-digit strings
+    const now = Date.now();
+    const order = { id:now, type:selectedType, tickets, raw, desc, start:now, warnAt: now + WARN_MS, expireAt: now + LIMIT_MS, warned:false, expired:false };
+    orders.push(order);
+
+    document.getElementById('inp-tickets').value = '';
+    document.getElementById('inp-desc').value    = '';
+    document.getElementById('form-panel').classList.remove('open');
+    document.getElementById('btn-new').innerHTML =
+      `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg> Nueva orden`;
+
+    renderCard(order);
+    updateStats();
+    saveState();
+    playBeep(880, 0.1);
+  }
+
+  function renderCard(o) {
+    document.getElementById('empty-state').style.display = 'none';
+    const typeLabel = { mobile:'📱 Mobile', pc:'🖥 PC', console:'🎮 Console' }[o.type];
+    const card = document.createElement('div');
+    card.className = 'order-card';
+    card.id = 'card-'+o.id;
+    card.dataset.type = o.type;
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="ticket-id">${esc(o.raw)}</span>
+          <span class="type-pill ${o.type}">${typeLabel}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button class="btn-delete" onclick="deleteOrder(${o.id})" title="Eliminar por error">🗑</button>
+          <button class="btn-done"   onclick="completeOrder(${o.id})">✓ Listo</button>
+        </div>
+      </div>
+      ${o.desc ? `<div class="card-desc">${esc(o.desc)}</div>` : ''}
+      <div class="timer-section">
+        <span class="timer-display" id="timer-${o.id}">30:00</span>
+        <span class="status-badge" id="badge-${o.id}">A tiempo</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="bar-${o.id}" style="width:0%"></div></div>
+      <div class="card-footer">
+        <span>Iniciada ${fmtHHMM(o.start)}</span>
+        <span id="footer-${o.id}">—</span>
+      </div>
+    `;
+    document.getElementById('cards-grid').appendChild(card);
+  }
+
+  function deleteOrder(id) {
+    if (!confirm('¿Eliminar esta orden? No se agregará al reporte.')) return;
+    const card = document.getElementById('card-'+id);
+    if (card) {
+      card.style.transition = 'opacity 0.25s,transform 0.25s';
+      card.style.opacity = '0'; card.style.transform = 'scale(0.95)';
+      setTimeout(()=>card.remove(), 250);
+    }
+    orders = orders.filter(x=>x.id!==id);
+    saveState();
+    if (orders.length===0) document.getElementById('empty-state').style.display='flex';
+    updateStats();
+  }
+
+  function completeOrder(id) {
+    const o = orders.find(x=>x.id===id);
+    if (o) {
+      o.tickets.forEach(t => { if (!report[o.type].includes(t)) report[o.type].push(t); });
+      saveState();
+    }
+    const card = document.getElementById('card-'+id);
+    if (card) {
+      card.style.transition = 'opacity 0.25s,transform 0.25s';
+      card.style.opacity = '0'; card.style.transform = 'scale(0.95)';
+      setTimeout(()=>card.remove(), 250);
+    }
+    orders = orders.filter(x=>x.id!==id);
+    doneCount++;
+    saveState();
+    if (orders.length===0) document.getElementById('empty-state').style.display='flex';
+    updateStats();
+    playBeep(1100, 0.25);
+  }
+
+  // ── Report ───────────────────────────────────────────────────
+  function getDateStr() {
+    const d=new Date();
+    return String(d.getFullYear())+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  }
+
+  function buildReport() {
+    const name = document.getElementById('inp-name').value.trim() || 'Nombre';
+    const date = getDateStr();
+    const mList = report.mobile.join(' ');
+    const pList = report.pc.join(' ');
+    const cList = report.console.join(' ');
+    const mCount = report.mobile.length;
+    const pCount = report.pc.length;
+    const cCount = report.console.length;
+    return (
+      `${name} ${date} end duty\n` +
+      `0 pending tickets mobile\n` +
+      `0 pending tickets pc\n` +
+      `\n` +
+      `1.(MOBILE - QA) 处理移动反馈工单${mCount}条ID号: ${mList}\n` +
+      `2.(MOBILE - CS) 处理移动客服工单X条ID号:\n` +
+      `3.(PC - QA) 处理PC反馈工单${pCount}条ID号: ${pList}\n` +
+      `4.(PC - CS) 处理PC反馈工单X条ID号:\n` +
+      `5.(MOBILE - ADD GAMES) 手游添加测试 条:\n` +
+      `6.(FORWARD) 收到转发移动QA工0单条，已经回复X条: ID:\n` +
+      `7.(CONSOLE - QA) 处理PC反馈工单${cCount}条ID号: ${cList}`
+    );
+  }
+
+  function refreshReport() {
+    document.getElementById('report-textarea').value = buildReport();
+  }
+
+  function openReport() {
+    refreshReport();
+    document.getElementById('modal-backdrop').classList.add('open');
+  }
+  function closeReport() { document.getElementById('modal-backdrop').classList.remove('open'); }
+  function closeReportOutside(e) { if (e.target===document.getElementById('modal-backdrop')) closeReport(); }
+
+  function copyReport() {
+    const text = document.getElementById('report-textarea').value;
+    navigator.clipboard.writeText(text).then(()=>{
+      const btn = document.getElementById('btn-copy');
+      btn.textContent = '✓ Copiado!';
+      setTimeout(()=>{ btn.textContent='📋 Copiar'; }, 2000);
+    }).catch(()=>{
+      document.getElementById('report-textarea').removeAttribute('readonly');
+      document.getElementById('report-textarea').select();
+      document.execCommand('copy');
+      document.getElementById('report-textarea').setAttribute('readonly','');
+    });
+  }
+
+  function resetReport() {
+    if (!confirm('¿Resetear el turno? Se borrarán todos los tickets completados del reporte.')) return;
+    report = { mobile:[], pc:[], console:[] };
+    doneCount = 0;
+    saveState();
+    updateStats();
+    refreshReport();
+  }
+
+  // ── Notifications ────────────────────────────────────────────
+  function showNotif(type, label) {
+    const overlay = document.getElementById('notif-overlay');
+    const n = document.createElement('div');
+    n.className = `notif ${type}`;
+    const isWarn = type==='warn';
+    const title = isWarn ? '⚠ 15 MIN — Respondé ahora' : '🚨 TIEMPO AGOTADO';
+    const msg   = isWarn
+      ? `La orden <strong>${esc(label)}</strong> lleva 15 min. Tenés 15 min más.`
+      : `La orden <strong>${esc(label)}</strong> superó los 30 minutos. ¡Respondé ya!`;
+    n.innerHTML = `
+      <div class="notif-dot"></div>
+      <div class="notif-body">
+        <div class="notif-title">${title}</div>
+        <div class="notif-msg">${msg}</div>
+      </div>
+      <button class="notif-close" onclick="this.parentElement.remove()">✕</button>
+    `;
+    overlay.appendChild(n);
+    if (isWarn) playWarnSound(); else playDangerSound();
+    if (Notification.permission==='granted') {
+      new Notification(title, { body: msg.replace(/<[^>]+>/g,''), tag: type+label });
+    }
+    setTimeout(()=>{ if(n.parentNode) n.remove(); }, 10000);
+  }
+
+  // ── Stats ────────────────────────────────────────────────────
+  function updateStats() {
+    let warn=0, exp=0;
+    const now=Date.now();
+    orders.forEach(o=>{
+      const e=now-o.start;
+      if (e>=LIMIT_MS) exp++; else if (e>=WARN_MS) warn++;
+    });
+    document.getElementById('stat-active').textContent  = orders.length;
+    document.getElementById('stat-warn').textContent    = warn;
+    document.getElementById('stat-expired').textContent = exp;
+    document.getElementById('stat-done').textContent    = doneCount;
+  }
+
+  // ── Tick ─────────────────────────────────────────────────────
+  function tick() {
+    const now=Date.now();
+    orders.forEach(o=>{
+      const elapsed   = now - o.start;
+      const remaining = o.expireAt - now;
+      const pct       = Math.min(100,(elapsed/LIMIT_MS)*100);
+      const card  = document.getElementById('card-'+o.id);
+      const timer = document.getElementById('timer-'+o.id);
+      const badge = document.getElementById('badge-'+o.id);
+      const bar   = document.getElementById('bar-'+o.id);
+      const foot  = document.getElementById('footer-'+o.id);
+      if (!card) return;
+      timer.textContent = fmtTime(Math.max(0, remaining));
+      bar.style.width   = pct.toFixed(1)+'%';
+      foot.textContent  = pct.toFixed(0)+'% del tiempo';
+      if (now >= o.expireAt) {
+        card.className='order-card danger'; card.dataset.type=o.type;
+        badge.textContent='¡Vencida!';
+        if (!o.expired) { o.expired=true; saveState(); showNotif('danger',o.raw); }
+      } else if (now >= o.warnAt) {
+        card.className='order-card warn'; card.dataset.type=o.type;
+        badge.textContent='¡Respondé ya!';
+        if (!o.warned) { o.warned=true; saveState(); showNotif('warn',o.raw); }
+      } else {
+        card.className='order-card'; card.dataset.type=o.type;
+        badge.textContent='A tiempo';
+      }
+    });
+    updateStats();
+  }
+
+  // ── Keyboard shortcuts ───────────────────────────────────────
+  document.addEventListener('keydown', e=>{
+    if ((e.ctrlKey||e.metaKey)&&e.key==='n') { e.preventDefault(); toggleForm(); }
+    if (e.key==='Escape') closeReport();
+  });
+  document.getElementById('inp-tickets').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('inp-desc').focus(); });
+  document.getElementById('inp-desc').addEventListener('keydown',    e=>{ if(e.key==='Enter') addOrder(); });
+
+  // ── Init ─────────────────────────────────────────────────────
+  if ('Notification' in window && Notification.permission==='default') Notification.requestPermission();
+  loadState();
+  loadPrefs();
+  // Re-render any orders that survived a page reload
+  if (orders.length > 0) {
+    document.getElementById('empty-state').style.display = 'none';
+    orders.forEach(o => renderCard(o));
+  }
+  updateStats();
+  setInterval(tick, 1000);
+  setInterval(updateClock, 1000);
+  updateClock();
 </script>
 </body>
 </html>
