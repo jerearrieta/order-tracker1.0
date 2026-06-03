@@ -160,6 +160,54 @@
     .notif-close { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px; line-height:1; padding:0; flex-shrink:0; }
     .notif-close:hover { color:var(--text-primary); }
 
+    /* Tabs */
+    .tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:1.5rem; }
+    .tab-btn { background:transparent; border:none; border-bottom:2px solid transparent; padding:10px 20px; font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); cursor:pointer; transition:color 0.15s,border-color 0.15s; margin-bottom:-1px; }
+    .tab-btn:hover { color:var(--text-secondary); }
+    .tab-btn.active { color:var(--text-primary); border-bottom-color:var(--accent); }
+    .tab-pane { display:none; }
+    .tab-pane.active { display:block; }
+
+    /* Excel log */
+    .log-controls { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:10px; }
+    .log-count { font-family:var(--mono); font-size:11px; color:var(--text-muted); letter-spacing:0.08em; }
+    .log-actions { display:flex; gap:8px; }
+    .btn-log-add { display:flex; align-items:center; gap:6px; background:var(--mobile); color:#fff; border:none; border-radius:var(--radius); padding:8px 16px; font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:opacity 0.15s; }
+    .btn-log-add:hover { opacity:0.85; }
+    .btn-copy-all { background:transparent; color:var(--ok); border:1px solid var(--ok); border-radius:var(--radius); padding:8px 14px; font-family:var(--mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:background 0.15s; }
+    .btn-copy-all:hover { background:var(--ok-dim); }
+    .btn-clear-log { background:transparent; color:var(--danger); border:1px solid var(--danger); border-radius:var(--radius); padding:8px 12px; font-family:var(--mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:background 0.15s; }
+    .btn-clear-log:hover { background:var(--danger-dim); }
+
+    .log-form { background:var(--bg-surface); border:1px solid var(--mobile); border-radius:var(--radius-lg); padding:1.1rem 1.25rem; margin-bottom:1rem; display:none; animation:slideDown 0.2s ease; }
+    .log-form.open { display:block; }
+    .log-form-title { font-family:var(--mono); font-size:10px; color:var(--mobile); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:1rem; }
+    .log-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .log-grid .form-field.full { grid-column:1/-1; }
+    .log-textarea { background:var(--bg-card); border:1px solid var(--border-strong); border-radius:var(--radius); padding:9px 12px; font-family:var(--sans); font-size:13px; color:var(--text-primary); outline:none; transition:border-color 0.15s; width:100%; resize:vertical; min-height:70px; }
+    .log-textarea:focus { border-color:var(--mobile); }
+    .log-textarea::placeholder { color:var(--text-muted); }
+    .log-form-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+
+    .log-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 2rem; border:1px dashed var(--border-strong); border-radius:var(--radius-lg); color:var(--text-muted); text-align:center; gap:10px; }
+    .log-empty-text { font-family:var(--mono); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+
+    .link-section { margin-bottom:1.25rem; background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; }
+    .link-section-header { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-bottom:1px solid var(--border); }
+    .link-section-title { display:flex; align-items:center; gap:8px; }
+    .btn-copy-section { background:transparent; color:var(--ok); border:1px solid var(--ok); border-radius:var(--radius); padding:5px 12px; font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:background 0.15s; }
+    .btn-copy-section:hover { background:var(--ok-dim); }
+    .link-list { padding:10px 14px; display:flex; flex-direction:column; gap:4px; min-height:44px; }
+    .link-empty { font-family:var(--mono); font-size:11px; color:var(--text-muted); padding:6px 0; }
+    .link-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:5px 8px; border-radius:var(--radius); background:var(--bg-card); }
+    .link-row:hover { background:#222; }
+    .link-url { font-family:var(--mono); font-size:11px; color:var(--mobile); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-url a { color:inherit; text-decoration:none; }
+    .link-url a:hover { text-decoration:underline; }
+    .link-num { font-family:var(--mono); font-size:11px; color:var(--text-muted); flex-shrink:0; }
+    .btn-link-del { background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:13px; padding:2px 4px; border-radius:2px; transition:color 0.15s,background 0.15s; flex-shrink:0; }
+    .btn-link-del:hover { color:var(--danger); background:var(--danger-dim); }
+
     @media (max-width:640px) {
       .main { padding:1rem; }
       .header { padding:0 1rem; }
@@ -196,45 +244,98 @@
     <div class="stat-cell"><div class="stat-label">// Completadas</div><div class="stat-value done" id="stat-done">0</div></div>
   </div>
 
-  <div class="controls">
-    <span class="section-title">// Órdenes en curso</span>
-    <div class="controls-right">
-      <button class="btn-report" onclick="openReport()">📋 End Duty Report</button>
-      <button class="btn-new" id="btn-new" onclick="toggleForm()">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
-        Nueva orden
-      </button>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('orders')">⏱ Órdenes</button>
+    <button class="tab-btn" onclick="switchTab('excel')">📊 Registro Excel</button>
+  </div>
+
+  <!-- Tab: Orders -->
+  <div class="tab-pane active" id="tab-orders">
+    <div class="controls">
+      <span class="section-title">// Órdenes en curso</span>
+      <div class="controls-right">
+        <button class="btn-report" onclick="openReport()">📋 End Duty Report</button>
+        <button class="btn-new" id="btn-new" onclick="toggleForm()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
+          Nueva orden
+        </button>
+      </div>
+    </div>
+
+    <div class="form-panel" id="form-panel">
+      <div class="form-title">// Registrar nueva orden</div>
+      <div class="type-selector">
+        <button class="type-btn active" data-type="mobile"  onclick="selectType('mobile')">📱 Mobile</button>
+        <button class="type-btn"        data-type="pc"      onclick="selectType('pc')">🖥 PC</button>
+        <button class="type-btn"        data-type="console" onclick="selectType('console')">🎮 Console</button>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-label" for="inp-tickets">Número de ticket</label>
+          <input class="form-input" type="text" id="inp-tickets" placeholder="889758 889759 889760" />
+          <span class="form-hint">Podés ingresar varios separados por espacio — el link se genera automáticamente</span>
+        </div>
+        <div class="form-field" style="max-width:220px;">
+          <label class="form-label" for="inp-desc">Descripción (opcional)</label>
+          <input class="form-input" type="text" id="inp-desc" placeholder="Breve detalle..." />
+        </div>
+        <div class="form-actions">
+          <button class="btn-submit" onclick="addOrder()">Iniciar timer</button>
+          <button class="btn-cancel" onclick="toggleForm()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards-grid" id="cards-grid">
+      <div class="empty-state" id="empty-state">
+        <svg class="empty-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="8" width="32" height="32" rx="4" stroke="currentColor" stroke-width="2"/><path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="empty-text">Sin órdenes activas</span>
+      </div>
     </div>
   </div>
 
-  <div class="form-panel" id="form-panel">
-    <div class="form-title">// Registrar nueva orden</div>
-    <div class="type-selector">
-      <button class="type-btn active" data-type="mobile"  onclick="selectType('mobile')">📱 Mobile</button>
-      <button class="type-btn"        data-type="pc"      onclick="selectType('pc')">🖥 PC</button>
-      <button class="type-btn"        data-type="console" onclick="selectType('console')">🎮 Console</button>
-    </div>
-    <div class="form-row">
-      <div class="form-field">
-        <label class="form-label" for="inp-tickets">Números de ticket (pueden ser varios)</label>
-        <input class="form-input" type="text" id="inp-tickets" placeholder="889758 889759 889760" />
-        <span class="form-hint">Separalos con espacios o comas</span>
-      </div>
-      <div class="form-field" style="max-width:220px;">
-        <label class="form-label" for="inp-desc">Descripción (opcional)</label>
-        <input class="form-input" type="text" id="inp-desc" placeholder="Breve detalle..." />
-      </div>
-      <div class="form-actions">
-        <button class="btn-submit" onclick="addOrder()">Iniciar timer</button>
-        <button class="btn-cancel" onclick="toggleForm()">Cancelar</button>
+  <!-- Tab: Excel log -->
+  <div class="tab-pane" id="tab-excel">
+    <div class="log-controls">
+      <span class="log-count" id="log-count">// 0 links</span>
+      <div class="log-actions">
+        <button class="btn-clear-log" onclick="clearLog()">🗑 Limpiar</button>
+        <button class="btn-copy-all" id="btn-copy-all" onclick="copyAllRows()">📋 Copiar todo</button>
       </div>
     </div>
-  </div>
 
-  <div class="cards-grid" id="cards-grid">
-    <div class="empty-state" id="empty-state">
-      <svg class="empty-icon" viewBox="0 0 48 48" fill="none"><rect x="8" y="8" width="32" height="32" rx="4" stroke="currentColor" stroke-width="2"/><path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <span class="empty-text">Sin órdenes activas</span>
+    <!-- Mobile links -->
+    <div class="link-section">
+      <div class="link-section-header">
+        <span class="link-section-title"><span class="type-pill mobile" style="font-size:10px;padding:3px 8px;">📱 Mobile</span></span>
+        <button class="btn-copy-section" id="btn-copy-mobile" onclick="copySection('mobile')">📋 Copiar Mobile</button>
+      </div>
+      <div class="link-list" id="links-mobile">
+        <div class="link-empty">Sin links Mobile todavía</div>
+      </div>
+    </div>
+
+    <!-- PC links -->
+    <div class="link-section">
+      <div class="link-section-header">
+        <span class="link-section-title"><span class="type-pill pc" style="font-size:10px;padding:3px 8px;">🖥 PC</span></span>
+        <button class="btn-copy-section" id="btn-copy-pc" onclick="copySection('pc')">📋 Copiar PC</button>
+      </div>
+      <div class="link-list" id="links-pc">
+        <div class="link-empty">Sin links PC todavía</div>
+      </div>
+    </div>
+
+    <!-- Console links -->
+    <div class="link-section">
+      <div class="link-section-header">
+        <span class="link-section-title"><span class="type-pill console" style="font-size:10px;padding:3px 8px;">🎮 Console</span></span>
+        <button class="btn-copy-section" id="btn-copy-console" onclick="copySection('console')">📋 Copiar Console</button>
+      </div>
+      <div class="link-list" id="links-console">
+        <div class="link-empty">Sin links Console todavía</div>
+      </div>
     </div>
   </div>
 </main>
@@ -292,6 +393,7 @@
         orders.forEach(ord => {
           if (!ord.warnAt)   ord.warnAt   = ord.start + WARN_MS;
           if (!ord.expireAt) ord.expireAt  = ord.start + LIMIT_MS;
+          if (!ord.urls) ord.urls = ord.tickets.map(t => buildUrl(ord.type, t));
         });
       }
     } catch(e) {}
@@ -366,8 +468,9 @@
     return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
   }
 
-  function parseTickets(raw) {
-    return raw.split(/[\s,]+/).map(t=>t.trim()).filter(t=>/^\d+$/.test(t));
+  function extractTicketNumber(input) {
+    const match = input.match(/(\d{6})/);
+    return match ? match[1] : null;
   }
 
   // ── Validation ───────────────────────────────────────────────
@@ -384,35 +487,46 @@
     setTimeout(() => { if(el) el.style.display='none'; }, 4000);
   }
 
+  // ── URL builder ──────────────────────────────────────────────
+  function buildUrl(type, num) {
+    const path = type === 'mobile' ? 'gub_mobile' : 'gub_pc';
+    return `https://fb.webapp.easebar.com/${path}/fb/${num}`;
+  }
+
   // ── Add Order ────────────────────────────────────────────────
   function addOrder() {
     const raw  = document.getElementById('inp-tickets').value.trim();
     const desc = document.getElementById('inp-desc').value.trim();
     if (!raw) { document.getElementById('inp-tickets').focus(); return; }
 
-    // Validate: all tokens must be exactly 6 digits
-    const tokens = raw.split(/[\s,]+/).map(t=>t.trim()).filter(Boolean);
+    // Split and validate all tokens
+    const tokens = raw.split(/[\s,]+/).map(t => t.trim()).filter(Boolean);
     const invalid = tokens.filter(t => !/^\d{6}$/.test(t));
     if (invalid.length > 0) {
-      showInputError(`Los siguientes números no son válidos (deben tener exactamente 6 dígitos): ${invalid.join(', ')}`);
+      showInputError(`Número(s) inválido(s) — deben tener exactamente 6 dígitos: ${invalid.join(', ')}`);
       document.getElementById('inp-tickets').focus();
       return;
     }
 
-    // Validate: no duplicate ticket+type among active orders
-    const duplicates = tokens.filter(t =>
-      orders.some(o => o.type === selectedType && o.tickets.includes(t))
-    );
+    // Validate: no duplicates among active orders
+    const duplicates = tokens.filter(t => orders.some(o => o.type === selectedType && o.tickets.includes(t)));
     if (duplicates.length > 0) {
       const typeLabel = { mobile:'Mobile', pc:'PC', console:'Console' }[selectedType];
-      showInputError('Ya existe una orden ' + typeLabel + ' activa con el ticket: ' + duplicates.join(', '));
+      showInputError(`Ya existe una orden ${typeLabel} activa con el ticket: ${duplicates.join(', ')}`);
       document.getElementById('inp-tickets').focus();
       return;
     }
 
-    const tickets = tokens; // already validated as 6-digit strings
     const now = Date.now();
-    const order = { id:now, type:selectedType, tickets, raw, desc, start:now, warnAt: now + WARN_MS, expireAt: now + LIMIT_MS, warned:false, expired:false };
+    const order = {
+      id: now, type: selectedType,
+      tickets: tokens,
+      raw: tokens.join(' '),
+      urls: tokens.map(t => buildUrl(selectedType, t)), // one link per ticket
+      desc, start: now,
+      warnAt: now + WARN_MS, expireAt: now + LIMIT_MS,
+      warned: false, expired: false
+    };
     orders.push(order);
 
     document.getElementById('inp-tickets').value = '';
@@ -476,7 +590,16 @@
   function completeOrder(id) {
     const o = orders.find(x=>x.id===id);
     if (o) {
+      // Add ticket numbers to end duty report
       o.tickets.forEach(t => { if (!report[o.type].includes(t)) report[o.type].push(t); });
+      // Add link(s) to Excel log
+      const urls = o.urls || (o.url ? [o.url] : []);
+      urls.forEach((url, i) => {
+        if (!links[o.type].some(r => r.url === url)) {
+          links[o.type].push({ id: Date.now() + i, url, num: o.tickets[i] || o.tickets[0] });
+        }
+      });
+      saveLinks();
       saveState();
     }
     const card = document.getElementById('card-'+id);
@@ -629,6 +752,88 @@
     updateStats();
   }
 
+  // ── Tabs ─────────────────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((b,i) => {
+      const tabs = ['orders','excel'];
+      b.classList.toggle('active', tabs[i]===name);
+    });
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    if (name==='excel') renderLinkLists();
+  }
+
+  // ── Excel link log ───────────────────────────────────────────
+  // links = { mobile: [{id, url, num}], pc: [...], console: [...] }
+  let links = { mobile: [], pc: [], console: [] };
+
+  function saveLinks() { localStorage.setItem('ot_links', JSON.stringify(links)); }
+  function loadLinks() {
+    try { const l=localStorage.getItem('ot_links'); if(l) links=JSON.parse(l); } catch(e){}
+  }
+
+  function deleteLinkRow(type, id) {
+    links[type] = links[type].filter(r=>r.id!==id);
+    saveLinks();
+    renderLinkLists();
+    updateLogCount();
+  }
+
+  function copySection(type) {
+    if (!links[type].length) return;
+    const text = links[type].map(r=>r.url).join('\n');
+    const btn = document.getElementById('btn-copy-'+type);
+    navigator.clipboard.writeText(text).then(()=>{
+      if(btn){ const orig=btn.textContent; btn.textContent='✓ Copiado!'; setTimeout(()=>btn.textContent=orig,2000); }
+    });
+  }
+
+  function copyAllRows() {
+    const all = [
+      ...links.mobile.map(r=>r.url),
+      ...links.pc.map(r=>r.url),
+      ...links.console.map(r=>r.url)
+    ];
+    if (!all.length) return;
+    const btn = document.getElementById('btn-copy-all');
+    navigator.clipboard.writeText(all.join('\n')).then(()=>{
+      btn.textContent='✓ Copiado!';
+      setTimeout(()=>{ btn.textContent='📋 Copiar todo'; },2000);
+    });
+  }
+
+  function clearLog() {
+    const total = links.mobile.length + links.pc.length + links.console.length;
+    if (!total) return;
+    if (!confirm('¿Limpiar todos los links del registro?')) return;
+    links = { mobile:[], pc:[], console:[] };
+    saveLinks();
+    renderLinkLists();
+    updateLogCount();
+  }
+
+  function updateLogCount() {
+    const total = links.mobile.length + links.pc.length + links.console.length;
+    document.getElementById('log-count').textContent = `// ${total} link${total!==1?'s':''}`;
+  }
+
+  function renderLinkLists() {
+    ['mobile','pc','console'].forEach(type => {
+      const container = document.getElementById('links-'+type);
+      if (!links[type].length) {
+        container.innerHTML = `<div class="link-empty">Sin links ${type.charAt(0).toUpperCase()+type.slice(1)} todavía</div>`;
+        return;
+      }
+      container.innerHTML = links[type].map(r=>`
+        <div class="link-row">
+          <span class="link-url"><a href="${esc(r.url)}" target="_blank">${esc(r.url)}</a></span>
+          <button class="btn-link-del" onclick="deleteLinkRow('${type}',${r.id})" title="Eliminar">🗑</button>
+        </div>
+      `).join('');
+    });
+    updateLogCount();
+  }
+
   // ── Keyboard shortcuts ───────────────────────────────────────
   document.addEventListener('keydown', e=>{
     if ((e.ctrlKey||e.metaKey)&&e.key==='n') { e.preventDefault(); toggleForm(); }
@@ -640,12 +845,14 @@
   // ── Init ─────────────────────────────────────────────────────
   if ('Notification' in window && Notification.permission==='default') Notification.requestPermission();
   loadState();
+  loadLinks();
   loadPrefs();
   // Re-render any orders that survived a page reload
   if (orders.length > 0) {
     document.getElementById('empty-state').style.display = 'none';
     orders.forEach(o => renderCard(o));
   }
+  renderLinkLists();
   updateStats();
   setInterval(tick, 1000);
   setInterval(updateClock, 1000);
