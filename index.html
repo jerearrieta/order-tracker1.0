@@ -617,14 +617,39 @@
   }
 
   // ── Report ───────────────────────────────────────────────────
+  // ── Schedule & duty type ─────────────────────────────────────
+  const SCHEDULE = {
+    0: { start: 12*60, end: 15*60 }, // domingo
+    1: { start: 11*60, end: 17*60 }, // lunes
+    2: { start: 10*60, end: 16*60 }, // martes
+    3: { start: 10*60, end: 17*60 }, // miércoles
+    4: { start: 10*60, end: 17*60 }, // jueves
+    5: { start: 11*60, end: 18*60 }, // viernes
+    6: { start: 12*60, end: 16*60 }, // sábado
+  };
+
+  // Returns 'start' during the 1h before shift + 30min grace, 'end' otherwise
+  function getDutyType() {
+    const now   = new Date();
+    const day   = now.getDay();
+    const mins  = now.getHours() * 60 + now.getMinutes();
+    const sched = SCHEDULE[day];
+    if (!sched) return 'end';
+    const windowStart = sched.start - 60;   // 1h before shift
+    const windowEnd   = sched.start + 30;   // 30min grace after shift starts
+    if (mins >= windowStart && mins < windowEnd) return 'start';
+    return 'end';
+  }
+
   function getDateStr() {
     const d=new Date();
     return String(d.getFullYear())+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
   }
 
   function buildReport() {
-    const name = document.getElementById('inp-name').value.trim() || 'Nombre';
-    const date = getDateStr();
+    const name  = document.getElementById('inp-name').value.trim() || 'Nombre';
+    const date  = getDateStr();
+    const duty  = getDutyType(); // 'start' or 'end'
     const mList = report.mobile.join(' ');
     const pList = report.pc.join(' ');
     const cList = report.console.join(' ');
@@ -632,7 +657,7 @@
     const pCount = report.pc.length;
     const cCount = report.console.length;
     return (
-      `${name} ${date} end duty\n` +
+      `${name} ${date} ${duty} duty\n` +
       `0 pending tickets mobile\n` +
       `0 pending tickets pc\n` +
       `\n` +
@@ -672,12 +697,15 @@
   }
 
   function resetReport() {
-    if (!confirm('¿Resetear el turno? Se borrarán todos los tickets completados del reporte.')) return;
-    report = { mobile:[], pc:[], console:[] };
+    if (!confirm('¿Resetear el turno? Se borrarán todos los tickets completados, el reporte y los links.')) return;
+    report    = { mobile:[], pc:[], console:[] };
+    links     = { mobile:[], pc:[], console:[] };
     doneCount = 0;
     saveState();
+    saveLinks();
     updateStats();
     refreshReport();
+    renderLinkLists();
   }
 
   // ── Notifications ────────────────────────────────────────────
