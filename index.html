@@ -619,24 +619,24 @@
   // ── Report ───────────────────────────────────────────────────
   // ── Schedule & duty type ─────────────────────────────────────
   const SCHEDULE = {
-    0: { start: 12*60, end: 15*60 }, // domingo
-    1: { start: 11*60, end: 17*60 }, // lunes
-    2: { start: 10*60, end: 16*60 }, // martes
-    3: { start: 10*60, end: 17*60 }, // miércoles
-    4: { start: 10*60, end: 17*60 }, // jueves
-    5: { start: 11*60, end: 18*60 }, // viernes
-    6: { start: 12*60, end: 16*60 }, // sábado
+    0: { start: 12*60 },      // domingo:    start duty 11:30–12:30
+    1: { start: 11*60 },      // lunes:      start duty 10:30–11:30
+    2: { start: 10*60 },      // martes:     start duty 09:30–10:30
+    3: { start: 10*60 },      // miércoles:  start duty 09:30–10:30
+    4: { start: 10*60 },      // jueves:     start duty 09:30–10:30
+    5: { start: 11*60 },      // viernes:    start duty 10:30–11:30
+    6: { start: 12*60 },      // sábado:     start duty 11:30–12:30
   };
 
-  // Returns 'start' during the 1h before shift + 30min grace, 'end' otherwise
+  // 'start duty' = 30min antes del turno hasta 30min después de que arranca
   function getDutyType() {
     const now   = new Date();
     const day   = now.getDay();
     const mins  = now.getHours() * 60 + now.getMinutes();
     const sched = SCHEDULE[day];
     if (!sched) return 'end';
-    const windowStart = sched.start - 60;   // 1h before shift
-    const windowEnd   = sched.start + 30;   // 30min grace after shift starts
+    const windowStart = sched.start - 30;
+    const windowEnd   = sched.start + 30;
     if (mins >= windowStart && mins < windowEnd) return 'start';
     return 'end';
   }
