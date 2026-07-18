@@ -208,6 +208,20 @@
     .btn-link-del { background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:13px; padding:2px 4px; border-radius:2px; transition:color 0.15s,background 0.15s; flex-shrink:0; }
     .btn-link-del:hover { color:var(--danger); background:var(--danger-dim); }
 
+    .status-toggle { display:flex; gap:4px; }
+    .status-toggle-btn { background:var(--bg-card); border:1px solid var(--border-strong); border-radius:var(--radius); padding:7px 10px; font-family:var(--mono); font-size:10px; font-weight:500; letter-spacing:0.06em; cursor:pointer; color:var(--text-muted); transition:all 0.15s; white-space:nowrap; }
+    .status-toggle-btn:hover { color:var(--text-primary); border-color:var(--text-secondary); }
+    .status-toggle-btn.new-active      { border-color:var(--ok);     color:var(--ok);     background:var(--ok-dim); }
+    .status-toggle-btn.prog-active { border-color:var(--mobile); color:var(--mobile); background:var(--mobile-dim); }
+
+    .report-section { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:10px 12px; margin-bottom:8px; }
+    .report-section-label { font-family:var(--mono); font-size:10px; color:var(--text-muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px; }
+    .report-ticket-list { display:flex; flex-wrap:wrap; gap:6px; min-height:24px; }
+    .report-ticket-chip { display:flex; align-items:center; gap:5px; background:var(--bg-surface); border:1px solid var(--border-strong); border-radius:3px; padding:3px 8px; font-family:var(--mono); font-size:12px; color:var(--text-primary); }
+    .report-ticket-chip .chip-del { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:13px; padding:0; line-height:1; transition:color 0.15s; }
+    .report-ticket-chip .chip-del:hover { color:var(--danger); }
+    .report-ticket-empty { font-family:var(--mono); font-size:11px; color:var(--text-muted); }
+
     @media (max-width:640px) {
       .main { padding:1rem; }
       .header { padding:0 1rem; }
@@ -280,6 +294,13 @@
           <label class="form-label" for="inp-desc">Descripción (opcional)</label>
           <input class="form-input" type="text" id="inp-desc" placeholder="Breve detalle..." />
         </div>
+        <div class="form-field" style="max-width:160px; flex:0 0 auto;">
+          <label class="form-label">Estado</label>
+          <div class="status-toggle">
+            <button class="status-toggle-btn active" id="stbtn-new"      onclick="selectStatus('new')">🟢 New</button>
+            <button class="status-toggle-btn"        id="stbtn-progress" onclick="selectStatus('progress')">🔵 In Progress</button>
+          </div>
+        </div>
         <div class="form-actions">
           <button class="btn-submit" onclick="addOrder()">Iniciar timer</button>
           <button class="btn-cancel" onclick="toggleForm()">Cancelar</button>
@@ -342,17 +363,36 @@
 
 <!-- Report Modal -->
 <div class="modal-backdrop" id="modal-backdrop" onclick="closeReportOutside(event)">
-  <div class="modal">
+  <div class="modal" style="max-width:700px;">
     <div class="modal-header">
-      <span class="modal-title">📋 End Duty Report</span>
+      <span class="modal-title" id="modal-duty-label">📋 End Duty Report</span>
       <button class="btn-modal-close" onclick="closeReport()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-field">
+      <div class="form-field" style="margin-bottom:12px;">
         <label class="form-label" for="inp-name">Tu nombre</label>
         <input class="form-input" type="text" id="inp-name" placeholder="Jeremías" oninput="savePrefs(); refreshReport()" style="max-width:240px;" />
       </div>
-      <textarea class="report-textarea" id="report-textarea" spellcheck="false" readonly></textarea>
+
+      <!-- Editable ticket lists per category -->
+      <div class="report-section">
+        <div class="report-section-label">1. MOBILE — QA</div>
+        <div class="report-ticket-list" id="rpt-mobile"></div>
+      </div>
+      <div class="report-section">
+        <div class="report-section-label">3. PC — QA</div>
+        <div class="report-ticket-list" id="rpt-pc"></div>
+      </div>
+      <div class="report-section">
+        <div class="report-section-label">7. CONSOLE — QA</div>
+        <div class="report-ticket-list" id="rpt-console"></div>
+      </div>
+
+      <!-- Final text preview -->
+      <div style="margin-top:14px;">
+        <div class="form-label" style="margin-bottom:6px;">Vista previa para copiar</div>
+        <textarea class="report-textarea" id="report-textarea" spellcheck="false" readonly style="min-height:220px;"></textarea>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-reset" onclick="resetReport()">🗑 Resetear turno</button>
@@ -363,6 +403,53 @@
 </div>
 
 <div class="notif-overlay" id="notif-overlay"></div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp }                            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAcIynCoCLtEa0u1XSIbN6sd4znWK6viAU",
+    authDomain:        "order-tracker-57d04.firebaseapp.com",
+    projectId:         "order-tracker-57d04",
+    storageBucket:     "order-tracker-57d04.firebasestorage.app",
+    messagingSenderId: "242875259323",
+    appId:             "1:242875259323:web:fe86ecb735f96839b3cc9e"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  const USER_ID = 'jeremias'; // identificador fijo para tu cuenta
+  const stateRef = doc(db, 'tracker', USER_ID);
+
+  // ── Firebase save ────────────────────────────────────────────
+  window.fbSave = async function(data) {
+    try { await setDoc(stateRef, data, { merge: true }); } catch(e) { console.warn('fbSave error', e); }
+  };
+
+  // ── Firebase realtime listener ───────────────────────────────
+  // Se activa cuando el otro dispositivo guarda algo
+  onSnapshot(stateRef, (snap) => {
+    if (!snap.exists()) return;
+    const data = snap.data();
+    // Solo actualiza si los datos vienen de OTRO dispositivo (compara timestamp)
+    if (data._savedAt && data._savedAt === window._lastSavedAt) return;
+    window.fbApply(data);
+  });
+
+  // ── Firebase initial load ────────────────────────────────────
+  getDoc(stateRef).then(snap => {
+    const data = snap.exists() ? snap.data() : {};
+    window.fbApply(data);
+    window._fbReady = true;
+    window.dispatchEvent(new Event('fb-ready'));
+  }).catch(() => {
+    window._fbReady = true;
+    window.dispatchEvent(new Event('fb-ready'));
+  });
+</script>
 
 <script>
   const WARN_MS  = 15 * 60 * 1000;
@@ -375,29 +462,62 @@
   let selectedType = 'mobile';
   let report       = { mobile: [], pc: [], console: [] };
 
-  // ── Persistence ──────────────────────────────────────────────
-  function saveState() {
-    localStorage.setItem('ot_report',    JSON.stringify(report));
-    localStorage.setItem('ot_doneCount', String(doneCount));
-    localStorage.setItem('ot_orders',    JSON.stringify(orders));
+  // ── Persistence (Firebase + localStorage fallback) ───────────
+  function buildSaveData() {
+    return {
+      report, doneCount, links,
+      orders: orders.map(o => ({...o})),
+      _savedAt: Date.now()
+    };
   }
+
+  function saveState() {
+    const data = buildSaveData();
+    window._lastSavedAt = data._savedAt;
+    // localStorage como backup inmediato
+    localStorage.setItem('ot_data', JSON.stringify(data));
+    // Firebase para sincronización entre dispositivos
+    if (window.fbSave) window.fbSave(data);
+  }
+
+  function saveLinks() { saveState(); }  // links ya están en saveState
+
+  function applyData(data) {
+    if (!data) return;
+    if (data.report)    { report    = data.report; }
+    if (data.doneCount !== undefined) { doneCount = data.doneCount; }
+    if (data.links)     { links     = data.links; }
+    if (data.orders)    {
+      orders = data.orders;
+      orders.forEach(ord => {
+        if (!ord.warnAt)   ord.warnAt   = ord.start + WARN_MS;
+        if (!ord.expireAt) ord.expireAt = ord.start + LIMIT_MS;
+        if (!ord.urls)     ord.urls     = ord.tickets.map(t => buildUrl(ord.type, t));
+        if (!ord.status)   ord.status   = 'new';
+      });
+    }
+  }
+
+  // Llamado por Firebase cuando llegan datos (otro dispositivo)
+  window.fbApply = function(data) {
+    if (!data || !Object.keys(data).length) return;
+    applyData(data);
+    // Re-renderizar todo
+    document.querySelectorAll('.order-card').forEach(c => c.remove());
+    document.getElementById('empty-state').style.display = orders.length ? 'none' : 'flex';
+    orders.forEach(o => renderCard(o));
+    renderLinkLists();
+    updateStats();
+    if (document.getElementById('modal-backdrop').classList.contains('open')) refreshReport();
+  };
+
   function loadState() {
     try {
-      const r = localStorage.getItem('ot_report');
-      if (r) report = JSON.parse(r);
-      doneCount = parseInt(localStorage.getItem('ot_doneCount') || '0') || 0;
-      const o = localStorage.getItem('ot_orders');
-      if (o) {
-        orders = JSON.parse(o);
-        // Recalculate warnAt/expireAt in case they were missing (legacy data)
-        orders.forEach(ord => {
-          if (!ord.warnAt)   ord.warnAt   = ord.start + WARN_MS;
-          if (!ord.expireAt) ord.expireAt  = ord.start + LIMIT_MS;
-          if (!ord.urls) ord.urls = ord.tickets.map(t => buildUrl(ord.type, t));
-        });
-      }
+      const raw = localStorage.getItem('ot_data');
+      if (raw) applyData(JSON.parse(raw));
     } catch(e) {}
   }
+
   function savePrefs() {
     const n = document.getElementById('inp-name').value.trim();
     if (n) localStorage.setItem('ot_name', n);
@@ -646,10 +766,38 @@
     return String(d.getFullYear())+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
   }
 
+  // ── Render ticket chips en el modal ──────────────────────────
+  function removeReportTicket(type, ticket) {
+    report[type] = report[type].filter(t => t !== ticket);
+    // También eliminar el link correspondiente del registro Excel
+    links[type] = links[type].filter(r => r.num !== ticket);
+    saveState();
+    renderReportChips();
+    refreshReport();
+    renderLinkLists();
+  }
+
+  function renderReportChips() {
+    ['mobile', 'pc', 'console'].forEach(type => {
+      const container = document.getElementById('rpt-' + type);
+      if (!container) return;
+      if (!report[type].length) {
+        container.innerHTML = `<span class="report-ticket-empty">Sin tickets</span>`;
+        return;
+      }
+      container.innerHTML = report[type].map(t => `
+        <span class="report-ticket-chip">
+          ${esc(t)}
+          <button class="chip-del" onclick="removeReportTicket('${type}','${t}')" title="Eliminar ticket">✕</button>
+        </span>
+      `).join('');
+    });
+  }
+
   function buildReport() {
     const name  = document.getElementById('inp-name').value.trim() || 'Nombre';
     const date  = getDateStr();
-    const duty  = getDutyType(); // 'start' or 'end'
+    const duty  = getDutyType();
     const mList = report.mobile.join(' ');
     const pList = report.pc.join(' ');
     const cList = report.console.join(' ');
@@ -672,10 +820,12 @@
   }
 
   function refreshReport() {
+    renderReportChips();
     document.getElementById('report-textarea').value = buildReport();
   }
 
   function openReport() {
+    renderReportChips();
     refreshReport();
     document.getElementById('modal-backdrop').classList.add('open');
   }
@@ -872,19 +1022,27 @@
 
   // ── Init ─────────────────────────────────────────────────────
   if ('Notification' in window && Notification.permission==='default') Notification.requestPermission();
-  loadState();
-  loadLinks();
-  loadPrefs();
-  // Re-render any orders that survived a page reload
-  if (orders.length > 0) {
-    document.getElementById('empty-state').style.display = 'none';
-    orders.forEach(o => renderCard(o));
+
+  function initApp() {
+    loadState();   // carga localStorage como base inmediata
+    loadPrefs();
+    if (orders.length > 0) {
+      document.getElementById('empty-state').style.display = 'none';
+      orders.forEach(o => renderCard(o));
+    }
+    renderLinkLists();
+    updateStats();
+    setInterval(tick, 1000);
+    setInterval(updateClock, 1000);
+    updateClock();
   }
-  renderLinkLists();
-  updateStats();
-  setInterval(tick, 1000);
-  setInterval(updateClock, 1000);
-  updateClock();
+
+  // Espera a que Firebase cargue; si tarda más de 3s arranca igual con localStorage
+  const fbTimeout = setTimeout(initApp, 3000);
+  window.addEventListener('fb-ready', () => {
+    clearTimeout(fbTimeout);
+    initApp();
+  });
 </script>
 </body>
 </html>
