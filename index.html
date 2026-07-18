@@ -294,13 +294,6 @@
           <label class="form-label" for="inp-desc">Descripción (opcional)</label>
           <input class="form-input" type="text" id="inp-desc" placeholder="Breve detalle..." />
         </div>
-        <div class="form-field" style="max-width:160px; flex:0 0 auto;">
-          <label class="form-label">Estado</label>
-          <div class="status-toggle">
-            <button class="status-toggle-btn active" id="stbtn-new"      onclick="selectStatus('new')">🟢 New</button>
-            <button class="status-toggle-btn"        id="stbtn-progress" onclick="selectStatus('progress')">🔵 In Progress</button>
-          </div>
-        </div>
         <div class="form-actions">
           <button class="btn-submit" onclick="addOrder()">Iniciar timer</button>
           <button class="btn-cancel" onclick="toggleForm()">Cancelar</button>
@@ -628,11 +621,19 @@
       return;
     }
 
-    // Validate: no duplicates among active orders
-    const duplicates = tokens.filter(t => orders.some(o => o.type === selectedType && o.tickets.includes(t)));
+    // Validate: no duplicates among active orders AND already completed (in report)
+    const allExisting = [
+      ...orders.flatMap(o => o.tickets),
+      ...report.mobile, ...report.pc, ...report.console
+    ];
+    const duplicates = tokens.filter(t => allExisting.includes(t));
     if (duplicates.length > 0) {
-      const typeLabel = { mobile:'Mobile', pc:'PC', console:'Console' }[selectedType];
-      showInputError(`Ya existe una orden ${typeLabel} activa con el ticket: ${duplicates.join(', ')}`);
+      const inActive    = duplicates.filter(t => orders.some(o => o.tickets.includes(t)));
+      const inCompleted = duplicates.filter(t => !inActive.includes(t));
+      let msg = '';
+      if (inActive.length)    msg += `Ya hay una orden activa con el ticket: ${inActive.join(', ')}. `;
+      if (inCompleted.length) msg += `El ticket ${inCompleted.join(', ')} ya fue completado en este turno.`;
+      showInputError(msg.trim());
       document.getElementById('inp-tickets').focus();
       return;
     }
@@ -771,10 +772,13 @@
     report[type] = report[type].filter(t => t !== ticket);
     // También eliminar el link correspondiente del registro Excel
     links[type] = links[type].filter(r => r.num !== ticket);
+    // Descontar de completadas
+    if (doneCount > 0) doneCount--;
     saveState();
     renderReportChips();
     refreshReport();
     renderLinkLists();
+    updateStats();
   }
 
   function renderReportChips() {
