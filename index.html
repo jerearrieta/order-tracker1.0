@@ -621,18 +621,18 @@
       return;
     }
 
-    // Validate: no duplicates among active orders AND already completed (in report)
-    const allExisting = [
-      ...orders.flatMap(o => o.tickets),
-      ...report.mobile, ...report.pc, ...report.console
-    ];
-    const duplicates = tokens.filter(t => allExisting.includes(t));
+    // Validate: no duplicates del mismo tipo — entre activas Y ya completadas
+    const activeOfType    = orders.filter(o => o.type === selectedType).flatMap(o => o.tickets);
+    const completedOfType = report[selectedType] || [];
+    const allOfType       = [...activeOfType, ...completedOfType];
+    const duplicates      = tokens.filter(t => allOfType.includes(t));
     if (duplicates.length > 0) {
-      const inActive    = duplicates.filter(t => orders.some(o => o.tickets.includes(t)));
-      const inCompleted = duplicates.filter(t => !inActive.includes(t));
+      const typeLabel   = { mobile:'Mobile', pc:'PC', console:'Console' }[selectedType];
+      const inActive    = duplicates.filter(t => activeOfType.includes(t));
+      const inCompleted = duplicates.filter(t => completedOfType.includes(t));
       let msg = '';
-      if (inActive.length)    msg += `Ya hay una orden activa con el ticket: ${inActive.join(', ')}. `;
-      if (inCompleted.length) msg += `El ticket ${inCompleted.join(', ')} ya fue completado en este turno.`;
+      if (inActive.length)    msg += `Ya hay una orden ${typeLabel} activa con el ticket: ${inActive.join(', ')}. `;
+      if (inCompleted.length) msg += `El ticket ${inCompleted.join(', ')} ya fue completado como ${typeLabel} en este turno.`;
       showInputError(msg.trim());
       document.getElementById('inp-tickets').focus();
       return;
