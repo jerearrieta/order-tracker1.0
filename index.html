@@ -288,7 +288,7 @@
         <div class="form-field">
           <label class="form-label" for="inp-tickets">Número de ticket</label>
           <input class="form-input" type="text" id="inp-tickets" placeholder="889758 889759 889760" />
-          <span class="form-hint">Podés ingresar varios separados por espacio — el link se genera automáticamente</span>
+          <span class="form-hint">Podés ingresar varios separados por espacio — 7 dígitos cada uno</span>
         </div>
         <div class="form-field" style="max-width:220px;">
           <label class="form-label" for="inp-desc">Descripción (opcional)</label>
@@ -414,32 +414,71 @@
   const app = initializeApp(firebaseConfig);
   const db  = getFirestore(app);
 
-  const USER_ID = 'jeremias'; // identificador fijo para tu cuenta
+  const USER_ID  = 'jeremias';
   const stateRef = doc(db, 'tracker', USER_ID);
+
+  // ID único por pestaña/sesión — se regenera cada vez que abrís la página
+  const SESSION_ID = Math.random().toString(36).slice(2);
+  let _ignoreNext = false; // bloquea el eco inmediato de nuestro propio save
 
   // ── Firebase save ────────────────────────────────────────────
   window.fbSave = async function(data) {
-    try { await setDoc(stateRef, data, { merge: true }); } catch(e) { console.warn('fbSave error', e); }
+    try {
+      _ignoreNext = true; // el próximo snapshot es eco nuestro, ignorarlo
+      await setDoc(stateRef, { ...data, _sessionId: SESSION_ID }, { merge: true });
+    } catch(e) {
+      _ignoreNext = false;
+      console.warn('fbSave error', e);
+    }
   };
 
   // ── Firebase realtime listener ───────────────────────────────
-  // Se activa cuando el otro dispositivo guarda algo
+  let _initialLoadDone = false;
   onSnapshot(stateRef, (snap) => {
     if (!snap.exists()) return;
     const data = snap.data();
-    // Solo actualiza si los datos vienen de OTRO dispositivo (compara timestamp)
-    if (data._savedAt && data._savedAt === window._lastSavedAt) return;
+
+    // Ignorar el primer snapshot (lo maneja getDoc abajo)
+    if (!_initialLoadDone) return;
+
+    // Ignorar ecos de nuestros propios cambios
+    if (_ignoreNext) { _ignoreNext = false; return; }
+
+    // Ignorar si el snapshot viene de esta misma sesión
+    if (data._sessionId === SESSION_ID) return;
+
+    // Es un cambio real de otro dispositivo — aplicarlo
     window.fbApply(data);
   });
 
   // ── Firebase initial load ────────────────────────────────────
   getDoc(stateRef).then(snap => {
-    const data = snap.exists() ? snap.data() : {};
-    window.fbApply(data);
-    window._fbReady = true;
+    const fbData    = snap.exists() ? snap.data() : null;
+    const fbTime    = fbData?._savedAt || 0;
+
+    // Leer timestamp local
+    let localTime = 0;
+    try { localTime = JSON.parse(localStorage.getItem('ot_data') || '{}')._savedAt || 0; } catch(e){}
+
+    if (fbData && fbTime >= localTime) {
+      // Firebase es más reciente → aplicar Firebase
+      window.fbApply(fbData);
+    } else if (localTime > fbTime) {
+      // localStorage es más reciente (trabajaste hoy en otro dispositivo sin subir)
+      // → cargar local y subirlo a Firebase para sincronizar
+      window._fbReady = true; // dejar que initApp cargue localStorage
+      try {
+        const localData = JSON.parse(localStorage.getItem('ot_data') || '{}');
+        window.fbSave(localData); // subir local a Firebase
+      } catch(e){}
+    }
+
+    _initialLoadDone = true;
+    window._fbReady  = true;
     window.dispatchEvent(new Event('fb-ready'));
   }).catch(() => {
-    window._fbReady = true;
+    _initialLoadDone = true;
+    window._fbReady  = true;
     window.dispatchEvent(new Event('fb-ready'));
   });
 </script>
@@ -614,9 +653,9 @@
 
     // Split and validate all tokens
     const tokens = raw.split(/[\s,]+/).map(t => t.trim()).filter(Boolean);
-    const invalid = tokens.filter(t => !/^\d{6}$/.test(t));
+    const invalid = tokens.filter(t => !/^\d{7}$/.test(t));
     if (invalid.length > 0) {
-      showInputError(`Número(s) inválido(s) — deben tener exactamente 6 dígitos: ${invalid.join(', ')}`);
+      showInputError(`Número(s) inválido(s) — deben tener exactamente 7 dígitos: ${invalid.join(', ')}`);
       document.getElementById('inp-tickets').focus();
       return;
     }
