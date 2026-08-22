@@ -288,7 +288,7 @@
         <div class="form-field">
           <label class="form-label" for="inp-tickets">Número de ticket</label>
           <input class="form-input" type="text" id="inp-tickets" placeholder="889758 889759 889760" />
-          <span class="form-hint">Podés ingresar varios separados por espacio — 7 dígitos cada uno</span>
+          <span class="form-hint">Podés ingresar varios separados por espacio — 6 o 7 dígitos cada uno</span>
         </div>
         <div class="form-field" style="max-width:220px;">
           <label class="form-label" for="inp-desc">Descripción (opcional)</label>
@@ -653,9 +653,9 @@
 
     // Split and validate all tokens
     const tokens = raw.split(/[\s,]+/).map(t => t.trim()).filter(Boolean);
-    const invalid = tokens.filter(t => !/^\d{7}$/.test(t));
+    const invalid = tokens.filter(t => !/^\d{6,7}$/.test(t));
     if (invalid.length > 0) {
-      showInputError(`Número(s) inválido(s) — deben tener exactamente 7 dígitos: ${invalid.join(', ')}`);
+      showInputError(`Número(s) inválido(s) — deben tener 6 o 7 dígitos: ${invalid.join(', ')}`);
       document.getElementById('inp-tickets').focus();
       return;
     }
